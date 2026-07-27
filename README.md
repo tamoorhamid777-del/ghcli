@@ -5,6 +5,7 @@
 [![CI](https://github.com/tamoorhamid777-del/ghcli/actions/workflows/ci.yml/badge.svg)](https://github.com/tamoorhamid777-del/ghcli/actions/workflows/ci.yml)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Coverage](https://img.shields.io/badge/coverage-80%25-brightgreen.svg)](https://github.com/tamoorhamid777-del/ghcli)
 
 ```
   ██████╗ ██╗  ██╗ ██████╗██╗     ██╗
@@ -632,6 +633,37 @@ ghcli comments delete owner/repo 987654321 --yes
 --json    # output raw JSON for scripting / piping to jq
 --limit N # max results (default 10-20)
 ```
+
+## Shell Completion
+
+`ghcli` supports tab completion for **bash**, **zsh**, and **fish**.
+
+### Quick setup
+
+```bash
+# Bash — add to ~/.bashrc
+eval "$(_GHCLI_COMPLETE=bash_source ghcli)"
+
+# Zsh — add to ~/.zshrc
+eval "$(_GHCLI_COMPLETE=zsh_source ghcli)"
+
+# Fish — save to completions directory
+_GHCLI_COMPLETE=fish_source ghcli > ~/.config/fish/completions/ghcli.fish
+```
+
+### Using the built-in helper
+
+```bash
+ghcli completions install          # auto-detects your shell
+ghcli completions install bash     # bash instructions
+ghcli completions install zsh      # zsh instructions
+ghcli completions install fish     # fish instructions
+
+ghcli completions generate bash    # print the raw bash script
+ghcli completions generate zsh > ~/.ghcli-complete.zsh
+```
+
+Pre-generated scripts are also available in the [`completions/`](completions/) directory.
 
 ## Contributing
 

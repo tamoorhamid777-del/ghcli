@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.2.1] — 2026-07-27
+
+### Added
+- `ghcli completions generate/install` — Shell tab-completion for bash, zsh, and fish
+- Pre-generated completion scripts in `completions/ghcli.bash`, `completions/ghcli.zsh`, `completions/ghcli.fish`
+- PyPI Trusted Publishing workflow (`.github/workflows/release.yml`) — auto-publishes on `v*` tag push
+- `pytest-cov` in dev dependencies; coverage reporting in CI (`--cov=ghcli --cov-report=xml`)
+- Coverage badge in README (80% achieved)
+- 136 new tests across 7 new test files (`test_status.py`, `test_commits.py`, `test_client.py`, `test_completions.py`, `test_files.py`, `test_prs.py`, `test_issues.py`)
+- Total: **223 tests, 100% passing, 80% coverage**
+
+### Changed
+- Version bumped to `1.2.1`
+- README updated with coverage badge, shell completion installation guide, and `completions/` directory reference
+
 ## [1.2.0] — 2026-07-27
 
 ### Added

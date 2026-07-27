@@ -27,6 +27,9 @@ from ghcli.commands.status import status
 # v1.2.0 commands
 from ghcli.commands.comments import comments
 
+# v1.2.1 commands
+from ghcli.commands.completions import completions
+
 console = Console()
 
 
@@ -60,6 +63,9 @@ cli.add_command(status)
 
 # v1.2.0 commands
 cli.add_command(comments)
+
+# v1.2.1 commands
+cli.add_command(completions)
 
 
 @cli.command("version")
