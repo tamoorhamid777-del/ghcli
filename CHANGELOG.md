@@ -1,5 +1,27 @@
 # Changelog
 
+## [1.1.0] — 2026-07-27
+
+### Added
+- `ghcli search repos/issues/code/users` — search GitHub with `--language`, `--sort`, `--limit`, `--json`
+- `ghcli gist create/list/view/delete` — full Gist management
+- `ghcli release list/create/view/download` — GitHub Releases management
+- `ghcli org list/members/repos/view` — Organization management
+- `ghcli notifications list/read/read-all` — Notification management
+- `ghcli star add/remove/list/check` — Star management
+- `ghcli status` — Auth status + API rate limit dashboard
+- `ghcli version` — Show version
+- `--json` output flag on all list commands for scripting
+- `--limit` / `--page` pagination flags on all list commands
+- Response caching with 30s TTL in `GitHubClient`
+- Exponential backoff retry (3 attempts) for 429/5xx errors
+- 41 tests across 8 test files (100% passing)
+
+### Changed
+- Bumped version to 1.1.0
+- `client.py` upgraded with caching, retry, and pagination helpers
+
+
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),

@@ -10,12 +10,27 @@ GitHub REST API client — thin wrapper around `requests` with:
 
 from __future__ import annotations
 
+import hashlib
 import time
 from typing import Any, Generator, Optional
 
 import requests
 
 from ghcli.auth_store import load_token
+
+# ---------------------------------------------------------------------------
+# Simple in-process TTL cache
+# ---------------------------------------------------------------------------
+_CACHE: dict[str, tuple[Any, float]] = {}
+_CACHE_TTL = 30  # seconds — GET responses cached for 30s by default
+
+def _cache_key(method: str, url: str, params: dict | None) -> str:
+    raw = f"{method}:{url}:{sorted((params or {}).items())}"
+    return hashlib.md5(raw.encode()).hexdigest()
+
+def clear_cache() -> None:
+    """Clear the in-process response cache."""
+    _CACHE.clear()
 
 GITHUB_API = "https://api.github.com"
 DEFAULT_TIMEOUT = 20  # seconds
@@ -119,18 +134,60 @@ class GitHubClient:
         headers: dict = {}
         if extra_headers:
             headers.update(extra_headers)
-        resp = self._session.request(
-            method,
-            url,
-            params=params,
-            json=json,
-            data=data,
-            headers=headers if headers else None,
-            timeout=DEFAULT_TIMEOUT,
-        )
-        self._handle_rate_limit(resp)
-        self._raise_for_status(resp)
-        return resp
+        # Check cache for GET requests
+        cache_key = _cache_key(method, url, params) if method == "GET" else None
+        if cache_key:
+            cached = _CACHE.get(cache_key)
+            if cached and time.time() - cached[1] < _CACHE_TTL:
+                # Return a mock response-like object from cache
+                class _CachedResp:
+                    ok = True
+                    status_code = 200
+                    content = b"cached"
+                    headers: dict = {}
+                    def json(self_inner): return cached[0]
+                    def text(self_inner): return str(cached[0])
+                return _CachedResp()
+
+        # Retry with exponential backoff
+        max_retries = 3
+        backoff = 1.0
+        last_exc: Exception | None = None
+        for attempt in range(max_retries):
+            try:
+                resp = self._session.request(
+                    method,
+                    url,
+                    params=params,
+                    json=json,
+                    data=data,
+                    headers=headers if headers else None,
+                    timeout=DEFAULT_TIMEOUT,
+                )
+                self._handle_rate_limit(resp)
+                self._raise_for_status(resp)
+                # Store in cache for GET
+                if cache_key and resp.ok and resp.content:
+                    try:
+                        _CACHE[cache_key] = (resp.json(), time.time())
+                    except Exception:
+                        pass
+                return resp
+            except GitHubAPIError as e:
+                if e.status_code in (429, 500, 502, 503, 504) and attempt < max_retries - 1:
+                    time.sleep(backoff)
+                    backoff *= 2
+                    last_exc = e
+                    continue
+                raise
+            except requests.exceptions.ConnectionError as e:
+                if attempt < max_retries - 1:
+                    time.sleep(backoff)
+                    backoff *= 2
+                    last_exc = e
+                    continue
+                raise
+        raise last_exc  # type: ignore
 
     # ------------------------------------------------------------------
     # Public CRUD methods

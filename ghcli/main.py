@@ -1,16 +1,12 @@
-#!/usr/bin/env python3
-"""
-ghcli — A GitHub CLI client built with Click + Rich.
-
-Entry point: ``ghcli`` (installed via pyproject.toml console_scripts).
-"""
-
+"""ghcli — GitHub CLI entry point. Registers all command groups."""
 from __future__ import annotations
 
 import click
 from rich.console import Console
 
 from ghcli import __version__
+
+# Existing commands
 from ghcli.commands.auth import auth
 from ghcli.commands.repos import repos
 from ghcli.commands.issues import issues
@@ -19,49 +15,29 @@ from ghcli.commands.commits import commits
 from ghcli.commands.files import files
 from ghcli.commands.skills import skills
 
-console = Console()
+# New v1.1.0 commands
+from ghcli.commands.search import search
+from ghcli.commands.gist import gist
+from ghcli.commands.release import release
+from ghcli.commands.org import org
+from ghcli.commands.notifications import notifications
+from ghcli.commands.star import star
+from ghcli.commands.status import status
 
-BANNER = """
-[bold cyan]
-  ██████╗ ██╗  ██╗ ██████╗██╗     ██╗
- ██╔════╝ ██║  ██║██╔════╝██║     ██║
- ██║  ███╗███████║██║     ██║     ██║
- ██║   ██║██╔══██║██║     ██║     ██║
- ╚██████╔╝██║  ██║╚██████╗███████╗██║
-  ╚═════╝ ╚═╝  ╚═╝ ╚═════╝╚══════╝╚═╝
-[/bold cyan]
-[dim]GitHub CLI Client — Interact with GitHub from your terminal[/dim]
-"""
+console = Console()
 
 
 @click.group()
 @click.version_option(version=__version__, prog_name="ghcli")
-@click.pass_context
-def cli(ctx: click.Context) -> None:
+def cli() -> None:
+    """ghcli — A powerful GitHub CLI with 7 AI-powered skill modules.
+
+    Authenticate first:  ghcli auth setup
+    Then explore:        ghcli repos list
     """
-    \b
-    ghcli — GitHub CLI Client
-    Manage repos, issues, PRs, commits, and files from your terminal.
-
-    \b
-    Quick Start:
-      ghcli auth setup              Set up your GitHub token
-      ghcli repos list              List your repositories
-      ghcli issues list OWNER/REPO  List open issues
-      ghcli prs list OWNER/REPO     List open pull requests
-      ghcli commits list OWNER/REPO View recent commits
-      ghcli files list OWNER/REPO   Browse repository files
-      ghcli skills --help           Explore skill modules (MCP, Browser, TDD…)
-
-    \b
-    Run any command with --help for full options:
-      ghcli repos --help
-      ghcli issues create --help
-    """
-    ctx.ensure_object(dict)
 
 
-# ── Register all command groups ────────────────────────────────────────────
+# Core commands
 cli.add_command(auth)
 cli.add_command(repos)
 cli.add_command(issues)
@@ -70,37 +46,25 @@ cli.add_command(commits)
 cli.add_command(files)
 cli.add_command(skills)
 
+# v1.1.0 commands
+cli.add_command(search)
+cli.add_command(gist)
+cli.add_command(release)
+cli.add_command(org)
+cli.add_command(notifications)
+cli.add_command(star)
+cli.add_command(status)
 
-# ── Standalone commands ────────────────────────────────────────────────────
 
-@cli.command("banner")
-def show_banner() -> None:
-    """Show the ghcli ASCII banner."""
-    console.print(BANNER)
-
-
-@cli.command("whoami")
-def whoami() -> None:
-    """Show the currently authenticated GitHub user."""
-    from ghcli.client import GitHubClient, GitHubAPIError
-
-    client = GitHubClient()
-    try:
-        client.require_auth()
-        user = client.get("/user")
-        console.print(
-            f"[bold green]✓[/bold green] Authenticated as "
-            f"[bold cyan]{user['login']}[/bold cyan] "
-            f"({user.get('name') or 'no name set'})"
-        )
-    except GitHubAPIError as e:
-        console.print(f"[red]✗ {e}[/red]")
-        raise SystemExit(1)
+@cli.command("version")
+def version_cmd() -> None:
+    """Show ghcli version."""
+    console.print(f"[bold cyan]ghcli[/bold cyan] version [bold]{__version__}[/bold]")
 
 
 def main() -> None:
     """Package entry point."""
-    cli(obj={})
+    cli()
 
 
 if __name__ == "__main__":

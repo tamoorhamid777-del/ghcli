@@ -536,6 +536,71 @@ ghcli/
 
 ---
 
+
+## v1.1.0 — New Commands
+
+### 🔍 Search
+```bash
+ghcli search repos "python cli" --language python --sort stars --limit 20
+ghcli search issues "memory leak" --limit 10
+ghcli search users "tamoor" --limit 5
+ghcli search code "def require_auth" --limit 10
+```
+
+### 📋 Gists
+```bash
+ghcli gist list
+ghcli gist create hello.py "print('hello')" --description "My gist" --public
+ghcli gist view <gist-id>
+ghcli gist delete <gist-id>
+```
+
+### 🚀 Releases
+```bash
+ghcli release list owner/repo
+ghcli release create owner/repo v1.2.0 --name "v1.2.0" --body "Release notes"
+ghcli release view owner/repo v1.0.0
+ghcli release download owner/repo v1.0.0
+```
+
+### 🏢 Organizations
+```bash
+ghcli org list
+ghcli org members myorg
+ghcli org repos myorg --sort stars
+ghcli org view myorg
+```
+
+### 🔔 Notifications
+```bash
+ghcli notifications list
+ghcli notifications list --all
+ghcli notifications read <thread-id>
+ghcli notifications read-all --yes
+```
+
+### ⭐ Stars
+```bash
+ghcli star list
+ghcli star list --user torvalds
+ghcli star add owner/repo
+ghcli star remove owner/repo
+ghcli star check owner/repo
+```
+
+### 📊 Status
+```bash
+ghcli status          # auth info + rate limits
+ghcli status --json   # raw JSON output
+ghcli version         # show version
+```
+
+### 🔧 Global Flags (all list commands)
+```bash
+--json    # output raw JSON for scripting
+--limit N # max results (default 10-20)
+```
+
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on how to contribute.
