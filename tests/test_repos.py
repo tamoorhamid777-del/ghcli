@@ -9,7 +9,6 @@ from click.testing import CliRunner
 
 from ghcli.commands.repos import repos
 
-
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------
@@ -39,18 +38,20 @@ class TestReposList:
         """repos list should display a table with repo names."""
         mock_client.require_auth.return_value = None
         # repos list uses c.paginate(), not c.get()
-        mock_client.paginate.return_value = iter([
-            {
-                "full_name": "tamoorhamid777-del/ghcli",
-                "private": False,
-                "description": "A GitHub CLI",
-                "stargazers_count": 5,
-                "forks_count": 1,
-                "language": "Python",
-                "updated_at": "2026-07-27T00:00:00Z",
-                "html_url": "https://github.com/tamoorhamid777-del/ghcli",
-            }
-        ])
+        mock_client.paginate.return_value = iter(
+            [
+                {
+                    "full_name": "tamoorhamid777-del/ghcli",
+                    "private": False,
+                    "description": "A GitHub CLI",
+                    "stargazers_count": 5,
+                    "forks_count": 1,
+                    "language": "Python",
+                    "updated_at": "2026-07-27T00:00:00Z",
+                    "html_url": "https://github.com/tamoorhamid777-del/ghcli",
+                }
+            ]
+        )
         result = runner.invoke(repos, ["list"])
         assert result.exit_code == 0
         assert "ghcli" in result.output

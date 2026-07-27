@@ -11,13 +11,13 @@ Available skills:
   parallel_dispatch — Asyncio/multiprocessing parallel agent dispatcher
 """
 
-from ghcli.skills.mcp_connector import MCPConnector
 from ghcli.skills.agent_browser import AgentBrowser
+from ghcli.skills.brainstorm_prd import BrainstormPRD
 from ghcli.skills.debugger import Debugger
 from ghcli.skills.deep_research import DeepResearcher
-from ghcli.skills.brainstorm_prd import BrainstormPRD
-from ghcli.skills.tdd import TDDRunner
+from ghcli.skills.mcp_connector import MCPConnector
 from ghcli.skills.parallel_dispatch import ParallelDispatcher
+from ghcli.skills.tdd import TDDRunner
 
 __all__ = [
     "MCPConnector",

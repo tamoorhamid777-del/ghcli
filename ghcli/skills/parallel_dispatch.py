@@ -66,13 +66,18 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Callable, Coroutine, Dict, List, Optional, Union
 
+from rich import box
 from rich.console import Console
 from rich.panel import Panel
 from rich.progress import (
-    BarColumn, Progress, SpinnerColumn, TaskProgressColumn, TextColumn, TimeElapsedColumn,
+    BarColumn,
+    Progress,
+    SpinnerColumn,
+    TaskProgressColumn,
+    TextColumn,
+    TimeElapsedColumn,
 )
 from rich.table import Table
-from rich import box
 
 console = Console()
 
@@ -111,6 +116,7 @@ def _list_plans() -> List[dict]:
 
 # ── Data classes ──────────────────────────────────────────────────────────────
 
+
 @dataclass
 class TaskResult:
     task_id: str
@@ -143,7 +149,7 @@ class TaskResult:
 class AgentTask:
     task_id: str
     name: str
-    kind: str                    # "async_fn" | "sync_fn" | "shell"
+    kind: str  # "async_fn" | "sync_fn" | "shell"
     fn: Optional[Callable] = None
     shell_cmd: str = ""
     args: Dict[str, Any] = field(default_factory=dict)
@@ -206,6 +212,7 @@ class DispatchReport:
 
 # ── Dispatch plan ─────────────────────────────────────────────────────────────
 
+
 class DispatchPlan:
     """A goal decomposed into parallel sub-tasks."""
 
@@ -214,7 +221,7 @@ class DispatchPlan:
         self.goal = goal
         self.tasks: List[AgentTask] = []
         self.created_at = time.time()
-        self.status = "pending"   # pending | running | done | failed
+        self.status = "pending"  # pending | running | done | failed
 
     def add_async_task(
         self,
@@ -224,11 +231,16 @@ class DispatchPlan:
         timeout: float = 60.0,
     ) -> "DispatchPlan":
         """Add an async coroutine task."""
-        self.tasks.append(AgentTask(
-            task_id=str(uuid.uuid4())[:6],
-            name=name, kind="async_fn", fn=fn,
-            args=args or {}, timeout=timeout,
-        ))
+        self.tasks.append(
+            AgentTask(
+                task_id=str(uuid.uuid4())[:6],
+                name=name,
+                kind="async_fn",
+                fn=fn,
+                args=args or {},
+                timeout=timeout,
+            )
+        )
         return self
 
     def add_sync_task(
@@ -239,11 +251,16 @@ class DispatchPlan:
         timeout: float = 60.0,
     ) -> "DispatchPlan":
         """Add a synchronous function task (run in thread pool)."""
-        self.tasks.append(AgentTask(
-            task_id=str(uuid.uuid4())[:6],
-            name=name, kind="sync_fn", fn=fn,
-            args=args or {}, timeout=timeout,
-        ))
+        self.tasks.append(
+            AgentTask(
+                task_id=str(uuid.uuid4())[:6],
+                name=name,
+                kind="sync_fn",
+                fn=fn,
+                args=args or {},
+                timeout=timeout,
+            )
+        )
         return self
 
     def add_shell_task(
@@ -254,11 +271,16 @@ class DispatchPlan:
         timeout: float = 60.0,
     ) -> "DispatchPlan":
         """Add a shell command task."""
-        self.tasks.append(AgentTask(
-            task_id=str(uuid.uuid4())[:6],
-            name=name, kind="shell", shell_cmd=command,
-            cwd=cwd, timeout=timeout,
-        ))
+        self.tasks.append(
+            AgentTask(
+                task_id=str(uuid.uuid4())[:6],
+                name=name,
+                kind="shell",
+                shell_cmd=command,
+                cwd=cwd,
+                timeout=timeout,
+            )
+        )
         return self
 
     def to_dict(self) -> dict:
@@ -281,6 +303,7 @@ class DispatchPlan:
 
 # ── Async worker pool ─────────────────────────────────────────────────────────
 
+
 class AsyncWorkerPool:
     """
     Executes a mix of async, sync, and shell tasks concurrently using asyncio.
@@ -299,24 +322,36 @@ class AsyncWorkerPool:
             assert task.fn is not None
             output = await asyncio.wait_for(task.fn(task), timeout=task.timeout)
             return TaskResult(
-                task_id=task.task_id, task_name=task.name,
-                success=True, output=output, error=None,
+                task_id=task.task_id,
+                task_name=task.name,
+                success=True,
+                output=output,
+                error=None,
                 duration=time.time() - started,
-                started_at=started, finished_at=time.time(),
+                started_at=started,
+                finished_at=time.time(),
             )
         except asyncio.TimeoutError:
             return TaskResult(
-                task_id=task.task_id, task_name=task.name,
-                success=False, output=None, error=f"Timed out after {task.timeout}s",
+                task_id=task.task_id,
+                task_name=task.name,
+                success=False,
+                output=None,
+                error=f"Timed out after {task.timeout}s",
                 duration=time.time() - started,
-                started_at=started, finished_at=time.time(),
+                started_at=started,
+                finished_at=time.time(),
             )
         except Exception as e:
             return TaskResult(
-                task_id=task.task_id, task_name=task.name,
-                success=False, output=None, error=str(e),
+                task_id=task.task_id,
+                task_name=task.name,
+                success=False,
+                output=None,
+                error=str(e),
                 duration=time.time() - started,
-                started_at=started, finished_at=time.time(),
+                started_at=started,
+                finished_at=time.time(),
             )
 
     async def _run_sync_task(self, task: AgentTask, loop: asyncio.AbstractEventLoop) -> TaskResult:
@@ -329,24 +364,36 @@ class AsyncWorkerPool:
                     timeout=task.timeout,
                 )
             return TaskResult(
-                task_id=task.task_id, task_name=task.name,
-                success=True, output=output, error=None,
+                task_id=task.task_id,
+                task_name=task.name,
+                success=True,
+                output=output,
+                error=None,
                 duration=time.time() - started,
-                started_at=started, finished_at=time.time(),
+                started_at=started,
+                finished_at=time.time(),
             )
         except asyncio.TimeoutError:
             return TaskResult(
-                task_id=task.task_id, task_name=task.name,
-                success=False, output=None, error=f"Timed out after {task.timeout}s",
+                task_id=task.task_id,
+                task_name=task.name,
+                success=False,
+                output=None,
+                error=f"Timed out after {task.timeout}s",
                 duration=time.time() - started,
-                started_at=started, finished_at=time.time(),
+                started_at=started,
+                finished_at=time.time(),
             )
         except Exception as e:
             return TaskResult(
-                task_id=task.task_id, task_name=task.name,
-                success=False, output=None, error=str(e),
+                task_id=task.task_id,
+                task_name=task.name,
+                success=False,
+                output=None,
+                error=str(e),
                 duration=time.time() - started,
-                started_at=started, finished_at=time.time(),
+                started_at=started,
+                finished_at=time.time(),
             )
 
     async def _run_shell_task(self, task: AgentTask) -> TaskResult:
@@ -359,33 +406,43 @@ class AsyncWorkerPool:
                 cwd=task.cwd or os.getcwd(),
             )
             try:
-                stdout, stderr = await asyncio.wait_for(
-                    proc.communicate(), timeout=task.timeout
-                )
+                stdout, stderr = await asyncio.wait_for(proc.communicate(), timeout=task.timeout)
             except asyncio.TimeoutError:
                 proc.kill()
                 await proc.communicate()
                 return TaskResult(
-                    task_id=task.task_id, task_name=task.name,
-                    success=False, output=None, error=f"Timed out after {task.timeout}s",
+                    task_id=task.task_id,
+                    task_name=task.name,
+                    success=False,
+                    output=None,
+                    error=f"Timed out after {task.timeout}s",
                     duration=time.time() - started,
-                    started_at=started, finished_at=time.time(),
+                    started_at=started,
+                    finished_at=time.time(),
                 )
             success = proc.returncode == 0
             output = stdout.decode(errors="replace")[-2000:]
             error = stderr.decode(errors="replace")[-500:] if not success else None
             return TaskResult(
-                task_id=task.task_id, task_name=task.name,
-                success=success, output=output, error=error,
+                task_id=task.task_id,
+                task_name=task.name,
+                success=success,
+                output=output,
+                error=error,
                 duration=time.time() - started,
-                started_at=started, finished_at=time.time(),
+                started_at=started,
+                finished_at=time.time(),
             )
         except Exception as e:
             return TaskResult(
-                task_id=task.task_id, task_name=task.name,
-                success=False, output=None, error=str(e),
+                task_id=task.task_id,
+                task_name=task.name,
+                success=False,
+                output=None,
+                error=str(e),
                 duration=time.time() - started,
-                started_at=started, finished_at=time.time(),
+                started_at=started,
+                finished_at=time.time(),
             )
 
     async def execute(self, tasks: List[AgentTask]) -> List[TaskResult]:
@@ -402,15 +459,21 @@ class AsyncWorkerPool:
                     return await self._run_shell_task(task)
                 else:
                     return TaskResult(
-                        task_id=task.task_id, task_name=task.name,
-                        success=False, output=None, error=f"Unknown task kind: {task.kind}",
-                        duration=0, started_at=time.time(), finished_at=time.time(),
+                        task_id=task.task_id,
+                        task_name=task.name,
+                        success=False,
+                        output=None,
+                        error=f"Unknown task kind: {task.kind}",
+                        duration=0,
+                        started_at=time.time(),
+                        finished_at=time.time(),
                     )
 
         return await asyncio.gather(*[bounded(t) for t in tasks])
 
 
 # ── Process worker pool (CPU-bound) ───────────────────────────────────────────
+
 
 class ProcessWorkerPool:
     """
@@ -427,8 +490,12 @@ class ProcessWorkerPool:
         started = time.time()
         try:
             result = subprocess.run(
-                cmd, shell=True, cwd=cwd or os.getcwd(),
-                capture_output=True, text=True, timeout=timeout,
+                cmd,
+                shell=True,  # nosec B602
+                cwd=cwd or os.getcwd(),
+                capture_output=True,
+                text=True,
+                timeout=timeout,
             )
             return {
                 "success": result.returncode == 0,
@@ -437,38 +504,63 @@ class ProcessWorkerPool:
                 "duration": time.time() - started,
             }
         except subprocess.TimeoutExpired:
-            return {"success": False, "output": None, "error": f"Timed out after {timeout}s", "duration": time.time() - started}
+            return {
+                "success": False,
+                "output": None,
+                "error": f"Timed out after {timeout}s",
+                "duration": time.time() - started,
+            }
         except Exception as e:
-            return {"success": False, "output": None, "error": str(e), "duration": time.time() - started}
+            return {
+                "success": False,
+                "output": None,
+                "error": str(e),
+                "duration": time.time() - started,
+            }
 
     def execute(self, tasks: List[AgentTask]) -> List[TaskResult]:
         shell_tasks = [t for t in tasks if t.kind == "shell"]
         args_list = [(t.shell_cmd, t.cwd, t.timeout) for t in shell_tasks]
         results = []
         with concurrent.futures.ProcessPoolExecutor(max_workers=self.max_workers) as executor:
-            futures = {executor.submit(self._run_shell, args): task
-                       for args, task in zip(args_list, shell_tasks)}
+            futures = {
+                executor.submit(self._run_shell, args): task
+                for args, task in zip(args_list, shell_tasks)
+            }
             for future, task in futures.items():
                 started = time.time()
                 try:
                     r = future.result(timeout=task.timeout + 5)
-                    results.append(TaskResult(
-                        task_id=task.task_id, task_name=task.name,
-                        success=r["success"], output=r["output"], error=r["error"],
-                        duration=r["duration"],
-                        started_at=started, finished_at=time.time(),
-                    ))
+                    results.append(
+                        TaskResult(
+                            task_id=task.task_id,
+                            task_name=task.name,
+                            success=r["success"],
+                            output=r["output"],
+                            error=r["error"],
+                            duration=r["duration"],
+                            started_at=started,
+                            finished_at=time.time(),
+                        )
+                    )
                 except Exception as e:
-                    results.append(TaskResult(
-                        task_id=task.task_id, task_name=task.name,
-                        success=False, output=None, error=str(e),
-                        duration=time.time() - started,
-                        started_at=started, finished_at=time.time(),
-                    ))
+                    results.append(
+                        TaskResult(
+                            task_id=task.task_id,
+                            task_name=task.name,
+                            success=False,
+                            output=None,
+                            error=str(e),
+                            duration=time.time() - started,
+                            started_at=started,
+                            finished_at=time.time(),
+                        )
+                    )
         return results
 
 
 # ── High-level façade ─────────────────────────────────────────────────────────
+
 
 class ParallelDispatcher:
     """
@@ -497,13 +589,15 @@ class ParallelDispatcher:
         wall_start = time.time()
 
         if verbose:
-            console.print(Panel(
-                f"[bold]Goal:[/bold]    {plan.goal}\n"
-                f"[bold]Tasks:[/bold]   {len(plan.tasks)}\n"
-                f"[bold]Workers:[/bold] {self.max_workers}",
-                title="[bold cyan]⚡ Parallel Dispatch[/bold cyan]",
-                border_style="cyan",
-            ))
+            console.print(
+                Panel(
+                    f"[bold]Goal:[/bold]    {plan.goal}\n"
+                    f"[bold]Tasks:[/bold]   {len(plan.tasks)}\n"
+                    f"[bold]Workers:[/bold] {self.max_workers}",
+                    title="[bold cyan]⚡ Parallel Dispatch[/bold cyan]",
+                    border_style="cyan",
+                )
+            )
 
         with Progress(
             SpinnerColumn(),
@@ -514,12 +608,20 @@ class ParallelDispatcher:
             console=console,
             transient=True,
         ) as progress:
-            prog_task = progress.add_task(f"Running {len(plan.tasks)} tasks…", total=len(plan.tasks))
+            prog_task = progress.add_task(
+                f"Running {len(plan.tasks)} tasks…", total=len(plan.tasks)
+            )
 
             async def tracked(task: AgentTask) -> TaskResult:
-                result = await self._async_pool._run_async_task(task) if task.kind == "async_fn" \
-                    else await self._async_pool._run_shell_task(task) if task.kind == "shell" \
-                    else await self._async_pool._run_sync_task(task, asyncio.get_event_loop())
+                result = (
+                    await self._async_pool._run_async_task(task)
+                    if task.kind == "async_fn"
+                    else (
+                        await self._async_pool._run_shell_task(task)
+                        if task.kind == "shell"
+                        else await self._async_pool._run_sync_task(task, asyncio.get_event_loop())
+                    )
+                )
                 progress.advance(prog_task)
                 return result
 
@@ -550,10 +652,14 @@ class ParallelDispatcher:
         wall_time = time.time() - wall_start
         succeeded = sum(1 for r in results if r.success)
         return DispatchReport(
-            plan_id=plan.plan_id, goal=plan.goal, results=results,
-            total_tasks=len(results), succeeded=succeeded,
+            plan_id=plan.plan_id,
+            goal=plan.goal,
+            results=results,
+            total_tasks=len(results),
+            succeeded=succeeded,
             failed=len(results) - succeeded,
-            wall_time=wall_time, created_at=time.time(),
+            wall_time=wall_time,
+            created_at=time.time(),
         )
 
     def execute_sync(self, plan: DispatchPlan) -> DispatchReport:
@@ -563,40 +669,63 @@ class ParallelDispatcher:
             started = time.time()
             if task.kind == "shell":
                 r = subprocess.run(
-                    task.shell_cmd, shell=True, cwd=task.cwd or os.getcwd(),
-                    capture_output=True, text=True, timeout=task.timeout,
+                    task.shell_cmd,
+                    shell=True,  # nosec B602
+                    cwd=task.cwd or os.getcwd(),
+                    capture_output=True,
+                    text=True,
+                    timeout=task.timeout,
                 )
-                results.append(TaskResult(
-                    task_id=task.task_id, task_name=task.name,
-                    success=r.returncode == 0,
-                    output=r.stdout[-2000:],
-                    error=r.stderr[-500:] if r.returncode != 0 else None,
-                    duration=time.time() - started,
-                    started_at=started, finished_at=time.time(),
-                ))
+                results.append(
+                    TaskResult(
+                        task_id=task.task_id,
+                        task_name=task.name,
+                        success=r.returncode == 0,
+                        output=r.stdout[-2000:],
+                        error=r.stderr[-500:] if r.returncode != 0 else None,
+                        duration=time.time() - started,
+                        started_at=started,
+                        finished_at=time.time(),
+                    )
+                )
             elif task.kind in ("async_fn", "sync_fn") and task.fn:
                 try:
                     if task.kind == "async_fn":
                         output = asyncio.run(task.fn(task))
                     else:
                         output = task.fn(task)
-                    results.append(TaskResult(
-                        task_id=task.task_id, task_name=task.name,
-                        success=True, output=output, error=None,
-                        duration=time.time() - started,
-                        started_at=started, finished_at=time.time(),
-                    ))
+                    results.append(
+                        TaskResult(
+                            task_id=task.task_id,
+                            task_name=task.name,
+                            success=True,
+                            output=output,
+                            error=None,
+                            duration=time.time() - started,
+                            started_at=started,
+                            finished_at=time.time(),
+                        )
+                    )
                 except Exception as e:
-                    results.append(TaskResult(
-                        task_id=task.task_id, task_name=task.name,
-                        success=False, output=None, error=str(e),
-                        duration=time.time() - started,
-                        started_at=started, finished_at=time.time(),
-                    ))
+                    results.append(
+                        TaskResult(
+                            task_id=task.task_id,
+                            task_name=task.name,
+                            success=False,
+                            output=None,
+                            error=str(e),
+                            duration=time.time() - started,
+                            started_at=started,
+                            finished_at=time.time(),
+                        )
+                    )
         succeeded = sum(1 for r in results if r.success)
         return DispatchReport(
-            plan_id=plan.plan_id, goal=plan.goal, results=results,
-            total_tasks=len(results), succeeded=succeeded,
+            plan_id=plan.plan_id,
+            goal=plan.goal,
+            results=results,
+            total_tasks=len(results),
+            succeeded=succeeded,
             failed=len(results) - succeeded,
             wall_time=sum(r.duration for r in results),
             created_at=time.time(),
@@ -605,18 +734,26 @@ class ParallelDispatcher:
     # ── Display helpers ───────────────────────────────────────────────────
 
     def print_report(self, report: DispatchReport) -> None:
-        rate_color = "green" if report.success_rate == 1.0 else "yellow" if report.success_rate >= 0.5 else "red"
-        console.print(Panel(
-            f"[bold]Goal:[/bold]         {report.goal}\n"
-            f"[bold]Tasks:[/bold]        {report.total_tasks}\n"
-            f"[bold]Succeeded:[/bold]    [{rate_color}]{report.succeeded}[/{rate_color}]\n"
-            f"[bold]Failed:[/bold]       [{'red' if report.failed else 'dim'}]{report.failed}[/{'red' if report.failed else 'dim'}]\n"
-            f"[bold]Wall time:[/bold]    {report.wall_time:.2f}s\n"
-            f"[bold]Success rate:[/bold] [{rate_color}]{report.success_rate:.0%}[/{rate_color}]",
-            title="[bold cyan]⚡ Dispatch Report[/bold cyan]",
-            border_style="cyan",
-        ))
-        table = Table(title="Task Results", box=box.ROUNDED, border_style="cyan", header_style="bold cyan")
+        rate_color = (
+            "green"
+            if report.success_rate == 1.0
+            else "yellow" if report.success_rate >= 0.5 else "red"
+        )
+        console.print(
+            Panel(
+                f"[bold]Goal:[/bold]         {report.goal}\n"
+                f"[bold]Tasks:[/bold]        {report.total_tasks}\n"
+                f"[bold]Succeeded:[/bold]    [{rate_color}]{report.succeeded}[/{rate_color}]\n"
+                f"[bold]Failed:[/bold]       [{'red' if report.failed else 'dim'}]{report.failed}[/{'red' if report.failed else 'dim'}]\n"
+                f"[bold]Wall time:[/bold]    {report.wall_time:.2f}s\n"
+                f"[bold]Success rate:[/bold] [{rate_color}]{report.success_rate:.0%}[/{rate_color}]",
+                title="[bold cyan]⚡ Dispatch Report[/bold cyan]",
+                border_style="cyan",
+            )
+        )
+        table = Table(
+            title="Task Results", box=box.ROUNDED, border_style="cyan", header_style="bold cyan"
+        )
         table.add_column("Task", min_width=20)
         table.add_column("Status", width=12)
         table.add_column("Duration", justify="right", width=10)
@@ -633,7 +770,9 @@ class ParallelDispatcher:
         if not plans:
             console.print("[yellow]No dispatch plans found.[/yellow]")
             return
-        table = Table(title="Dispatch Plans", box=box.ROUNDED, border_style="cyan", header_style="bold cyan")
+        table = Table(
+            title="Dispatch Plans", box=box.ROUNDED, border_style="cyan", header_style="bold cyan"
+        )
         table.add_column("ID", width=10)
         table.add_column("Goal", min_width=30)
         table.add_column("Tasks", justify="right", width=8)
@@ -641,11 +780,17 @@ class ParallelDispatcher:
         table.add_column("Created", width=12)
         for p in plans:
             created = time.strftime("%Y-%m-%d", time.localtime(p.get("created_at", 0)))
-            status_colors = {"pending": "yellow", "running": "cyan", "done": "green", "failed": "red"}
+            status_colors = {
+                "pending": "yellow",
+                "running": "cyan",
+                "done": "green",
+                "failed": "red",
+            }
             status = p.get("status", "pending")
             color = status_colors.get(status, "white")
             table.add_row(
-                p["plan_id"], p["goal"],
+                p["plan_id"],
+                p["goal"],
                 str(len(p.get("tasks", []))),
                 f"[{color}]{status}[/{color}]",
                 created,

@@ -1,4 +1,5 @@
 """Tests for ghcli status command."""
+
 from __future__ import annotations
 
 from unittest.mock import MagicMock, patch
@@ -55,6 +56,7 @@ class TestStatusNotAuthenticated:
             result = runner.invoke(status, ["--json"])
         assert result.exit_code == 0
         import json
+
         data = json.loads(result.output)
         assert data["authenticated"] is False
 
@@ -73,6 +75,7 @@ class TestStatusAuthenticated:
             result = runner.invoke(status, ["--json"])
         assert result.exit_code == 0
         import json
+
         data = json.loads(result.output)
         assert "user" in data
         assert data["user"]["login"] == "testuser"

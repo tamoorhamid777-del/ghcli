@@ -57,15 +57,15 @@ import os
 import subprocess
 import time
 import uuid
-from dataclasses import dataclass, field, asdict
+from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Dict, List, Optional
 
+from rich import box
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
-from rich import box
 
 console = Console()
 
@@ -80,9 +80,7 @@ def _session_path(session_id: str) -> Path:
 
 def _save_tdd_session(session: "TDDSession") -> None:
     TDD_DIR.mkdir(parents=True, exist_ok=True)
-    _session_path(session.session_id).write_text(
-        json.dumps(session.to_dict(), indent=2)
-    )
+    _session_path(session.session_id).write_text(json.dumps(session.to_dict(), indent=2))
 
 
 def _load_tdd_session(session_id: str) -> "TDDSession":
@@ -106,9 +104,10 @@ def _list_tdd_sessions() -> List[dict]:
 
 # ── Data classes ──────────────────────────────────────────────────────────────
 
+
 @dataclass
 class TestResult:
-    phase: str           # red | green | refactor
+    phase: str  # red | green | refactor
     passed: bool
     exit_code: int
     stdout: str
@@ -133,7 +132,7 @@ class TestResult:
 class TDDCycle:
     cycle_id: str
     test_name: str
-    phase: str = "red"          # red | green | refactor | committed | done
+    phase: str = "red"  # red | green | refactor | committed | done
     test_file: str = ""
     impl_file: str = ""
     refactor_note: str = ""
@@ -149,11 +148,11 @@ class TDDCycle:
     @property
     def phase_badge(self) -> Text:
         mapping = {
-            "red":       Text("🔴 RED",       style="bold red"),
-            "green":     Text("🟢 GREEN",     style="bold green"),
-            "refactor":  Text("🔵 REFACTOR",  style="bold blue"),
-            "committed": Text("✓ COMMITTED",  style="bold cyan"),
-            "done":      Text("✓ DONE",       style="bold dim"),
+            "red": Text("🔴 RED", style="bold red"),
+            "green": Text("🟢 GREEN", style="bold green"),
+            "refactor": Text("🔵 REFACTOR", style="bold blue"),
+            "committed": Text("✓ COMMITTED", style="bold cyan"),
+            "done": Text("✓ DONE", style="bold dim"),
         }
         return mapping.get(self.phase, Text(self.phase))
 
@@ -202,6 +201,7 @@ class TDDReport:
 
 # ── Test runner ───────────────────────────────────────────────────────────────
 
+
 class TestRunner:
     """Executes a test command and captures results."""
 
@@ -215,7 +215,7 @@ class TestRunner:
         try:
             result = subprocess.run(
                 cmd,
-                shell=True,
+                shell=True,  # nosec B602
                 cwd=self.cwd,
                 capture_output=True,
                 text=True,
@@ -226,25 +226,32 @@ class TestRunner:
                 phase=phase,
                 passed=result.returncode == 0,
                 exit_code=result.returncode,
-                stdout=result.stdout[-3000:],   # keep last 3000 chars
+                stdout=result.stdout[-3000:],  # keep last 3000 chars
                 stderr=result.stderr[-1000:],
                 duration=duration,
             )
         except subprocess.TimeoutExpired:
             return TestResult(
-                phase=phase, passed=False, exit_code=-1,
-                stdout="", stderr="Test run timed out after 120s",
+                phase=phase,
+                passed=False,
+                exit_code=-1,
+                stdout="",
+                stderr="Test run timed out after 120s",
                 duration=time.time() - t0,
             )
         except Exception as e:
             return TestResult(
-                phase=phase, passed=False, exit_code=-1,
-                stdout="", stderr=str(e),
+                phase=phase,
+                passed=False,
+                exit_code=-1,
+                stdout="",
+                stderr=str(e),
                 duration=time.time() - t0,
             )
 
 
 # ── TDD Session ───────────────────────────────────────────────────────────────
+
 
 class TDDSession:
     """Stateful TDD session tracking all cycles."""
@@ -273,15 +280,17 @@ class TDDSession:
         )
         self.cycles.append(cycle)
         _save_tdd_session(self)
-        console.print(Panel(
-            f"[bold]Cycle ID:[/bold]  [cyan]{cycle.cycle_id}[/cyan]\n"
-            f"[bold]Test:[/bold]      {test_name}\n"
-            f"[bold]Phase:[/bold]     {cycle.phase_badge}\n\n"
-            "[dim]Step 1: Write a FAILING test first.[/dim]\n"
-            "[dim]Step 2: Run 'red' to confirm it fails.[/dim]",
-            title="[bold red]🔴 New TDD Cycle[/bold red]",
-            border_style="red",
-        ))
+        console.print(
+            Panel(
+                f"[bold]Cycle ID:[/bold]  [cyan]{cycle.cycle_id}[/cyan]\n"
+                f"[bold]Test:[/bold]      {test_name}\n"
+                f"[bold]Phase:[/bold]     {cycle.phase_badge}\n\n"
+                "[dim]Step 1: Write a FAILING test first.[/dim]\n"
+                "[dim]Step 2: Run 'red' to confirm it fails.[/dim]",
+                title="[bold red]🔴 New TDD Cycle[/bold red]",
+                border_style="red",
+            )
+        )
         return cycle
 
     def get_cycle(self, cycle_id: str) -> TDDCycle:
@@ -308,7 +317,9 @@ class TDDSession:
                     "[dim]Your test may already be implemented, or the test is wrong.[/dim]"
                 )
             else:
-                console.print("[bold red]✓ RED phase: tests failed as expected.[/bold red] Now write the implementation.")
+                console.print(
+                    "[bold red]✓ RED phase: tests failed as expected.[/bold red] Now write the implementation."
+                )
                 cycle.phase = "green"
 
         elif phase == "green":
@@ -323,7 +334,9 @@ class TDDSession:
 
         elif phase == "refactor":
             if result.passed:
-                console.print("[bold blue]✓ REFACTOR phase: tests still pass.[/bold blue] Ready to commit.")
+                console.print(
+                    "[bold blue]✓ REFACTOR phase: tests still pass.[/bold blue] Ready to commit."
+                )
                 cycle.phase = "committed"
             else:
                 console.print(
@@ -392,12 +405,14 @@ class TDDSession:
     def _print_result(self, result: TestResult) -> None:
         color = "green" if result.passed else "red"
         status = "PASS" if result.passed else "FAIL"
-        console.print(Panel(
-            f"[bold {color}]{status}[/bold {color}]  exit={result.exit_code}  {result.duration:.2f}s\n\n"
-            f"[dim]{result.stdout[-800:]}[/dim]",
-            title=f"[bold]Test Run — {result.phase.upper()}[/bold]",
-            border_style=color,
-        ))
+        console.print(
+            Panel(
+                f"[bold {color}]{status}[/bold {color}]  exit={result.exit_code}  {result.duration:.2f}s\n\n"
+                f"[dim]{result.stdout[-800:]}[/dim]",
+                title=f"[bold]Test Run — {result.phase.upper()}[/bold]",
+                border_style=color,
+            )
+        )
 
     def to_dict(self) -> dict:
         return {
@@ -424,6 +439,7 @@ class TDDSession:
 
 # ── High-level façade ─────────────────────────────────────────────────────────
 
+
 class TDDRunner:
     """High-level TDD façade."""
 
@@ -434,30 +450,36 @@ class TDDRunner:
     def new_session(self, title: str) -> TDDSession:
         sess = TDDSession(title=title, test_command=self.test_command, src_dir=self.src_dir)
         _save_tdd_session(sess)
-        console.print(Panel(
-            f"[bold]Session ID:[/bold]   [cyan]{sess.session_id}[/cyan]\n"
-            f"[bold]Title:[/bold]        {title}\n"
-            f"[bold]Test command:[/bold] [dim]{self.test_command}[/dim]\n"
-            f"[bold]Source dir:[/bold]   [dim]{self.src_dir}[/dim]\n\n"
-            "[dim]TDD Loop: RED → GREEN → REFACTOR → COMMIT[/dim]",
-            title="[bold cyan]🧪 New TDD Session[/bold cyan]",
-            border_style="cyan",
-        ))
+        console.print(
+            Panel(
+                f"[bold]Session ID:[/bold]   [cyan]{sess.session_id}[/cyan]\n"
+                f"[bold]Title:[/bold]        {title}\n"
+                f"[bold]Test command:[/bold] [dim]{self.test_command}[/dim]\n"
+                f"[bold]Source dir:[/bold]   [dim]{self.src_dir}[/dim]\n\n"
+                "[dim]TDD Loop: RED → GREEN → REFACTOR → COMMIT[/dim]",
+                title="[bold cyan]🧪 New TDD Session[/bold cyan]",
+                border_style="cyan",
+            )
+        )
         return sess
 
     def load(self, session_id: str) -> TDDSession:
         return _load_tdd_session(session_id)
 
     def print_report(self, report: TDDReport) -> None:
-        console.print(Panel(
-            f"[bold]Title:[/bold]          {report.title}\n"
-            f"[bold]Cycles:[/bold]         {report.completed_cycles}/{report.total_cycles} completed\n"
-            f"[bold]Total test runs:[/bold] {report.total_test_runs}",
-            title="[bold cyan]🧪 TDD Report[/bold cyan]",
-            border_style="cyan",
-        ))
+        console.print(
+            Panel(
+                f"[bold]Title:[/bold]          {report.title}\n"
+                f"[bold]Cycles:[/bold]         {report.completed_cycles}/{report.total_cycles} completed\n"
+                f"[bold]Total test runs:[/bold] {report.total_test_runs}",
+                title="[bold cyan]🧪 TDD Report[/bold cyan]",
+                border_style="cyan",
+            )
+        )
         if report.cycles:
-            table = Table(title="Cycles", box=box.ROUNDED, border_style="cyan", header_style="bold cyan")
+            table = Table(
+                title="Cycles", box=box.ROUNDED, border_style="cyan", header_style="bold cyan"
+            )
             table.add_column("ID", width=8)
             table.add_column("Test name", min_width=30)
             table.add_column("Phase", width=14)
@@ -465,8 +487,11 @@ class TDDRunner:
             table.add_column("Commit message", min_width=25)
             for c in report.cycles:
                 table.add_row(
-                    c.cycle_id, c.test_name, str(c.phase_badge),
-                    str(len(c.results)), c.commit_message or "—",
+                    c.cycle_id,
+                    c.test_name,
+                    str(c.phase_badge),
+                    str(len(c.results)),
+                    c.commit_message or "—",
                 )
             console.print(table)
 
@@ -475,7 +500,9 @@ class TDDRunner:
         if not sessions:
             console.print("[yellow]No TDD sessions found.[/yellow]")
             return
-        table = Table(title="TDD Sessions", box=box.ROUNDED, border_style="cyan", header_style="bold cyan")
+        table = Table(
+            title="TDD Sessions", box=box.ROUNDED, border_style="cyan", header_style="bold cyan"
+        )
         table.add_column("ID", width=10)
         table.add_column("Title", min_width=30)
         table.add_column("Cycles", justify="right", width=8)
@@ -484,7 +511,8 @@ class TDDRunner:
         for s in sessions:
             created = time.strftime("%Y-%m-%d", time.localtime(s.get("created_at", 0)))
             table.add_row(
-                s["session_id"], s["title"],
+                s["session_id"],
+                s["title"],
                 str(len(s.get("cycles", []))),
                 s.get("test_command", "pytest"),
                 created,

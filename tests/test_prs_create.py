@@ -1,4 +1,5 @@
 """Tests for ghcli prs create / merge / close commands."""
+
 from __future__ import annotations
 
 import json
@@ -54,10 +55,15 @@ def test_prs_create_basic(runner, mock_token):
         result = runner.invoke(
             cli,
             [
-                "prs", "create", "owner/repo",
-                "--title", "Add new feature",
-                "--head", "feature-branch",
-                "--base", "main",
+                "prs",
+                "create",
+                "owner/repo",
+                "--title",
+                "Add new feature",
+                "--head",
+                "feature-branch",
+                "--base",
+                "main",
             ],
         )
     assert result.exit_code == 0
@@ -71,9 +77,13 @@ def test_prs_create_draft(runner, mock_token):
         result = runner.invoke(
             cli,
             [
-                "prs", "create", "owner/repo",
-                "--title", "WIP feature",
-                "--head", "wip-branch",
+                "prs",
+                "create",
+                "owner/repo",
+                "--title",
+                "WIP feature",
+                "--head",
+                "wip-branch",
                 "--draft",
             ],
         )
@@ -88,10 +98,15 @@ def test_prs_create_with_body(runner, mock_token):
         result = runner.invoke(
             cli,
             [
-                "prs", "create", "owner/repo",
-                "--title", "Feature",
-                "--head", "feat",
-                "--body", "Detailed description",
+                "prs",
+                "create",
+                "owner/repo",
+                "--title",
+                "Feature",
+                "--head",
+                "feat",
+                "--body",
+                "Detailed description",
             ],
         )
     assert result.exit_code == 0
@@ -122,6 +137,7 @@ def test_prs_create_missing_title(runner, mock_token):
 def test_prs_create_api_error(runner, mock_token):
     """prs create shows error on API failure."""
     from ghcli.client import GitHubAPIError
+
     with patch(
         "ghcli.client.GitHubClient.post",
         side_effect=GitHubAPIError("No commits between main and feat", 422),
@@ -129,9 +145,13 @@ def test_prs_create_api_error(runner, mock_token):
         result = runner.invoke(
             cli,
             [
-                "prs", "create", "owner/repo",
-                "--title", "Empty PR",
-                "--head", "feat",
+                "prs",
+                "create",
+                "owner/repo",
+                "--title",
+                "Empty PR",
+                "--head",
+                "feat",
             ],
         )
     assert result.exit_code != 0 or "✗" in result.output
@@ -142,7 +162,11 @@ def test_prs_create_api_error(runner, mock_token):
 
 def test_prs_merge_default(runner, mock_token):
     """prs merge uses merge method by default."""
-    merge_result = {"sha": "abc1234def5678", "merged": True, "message": "Pull Request successfully merged"}
+    merge_result = {
+        "sha": "abc1234def5678",
+        "merged": True,
+        "message": "Pull Request successfully merged",
+    }
     with patch("ghcli.client.GitHubClient.put", return_value=merge_result) as mock_put:
         result = runner.invoke(cli, ["prs", "merge", "owner/repo", "7"])
     assert result.exit_code == 0
@@ -153,7 +177,11 @@ def test_prs_merge_default(runner, mock_token):
 
 def test_prs_merge_squash(runner, mock_token):
     """prs merge --method squash uses squash method."""
-    merge_result = {"sha": "abc1234def5678", "merged": True, "message": "Pull Request successfully merged"}
+    merge_result = {
+        "sha": "abc1234def5678",
+        "merged": True,
+        "message": "Pull Request successfully merged",
+    }
     with patch("ghcli.client.GitHubClient.put", return_value=merge_result) as mock_put:
         result = runner.invoke(
             cli,
@@ -166,7 +194,11 @@ def test_prs_merge_squash(runner, mock_token):
 
 def test_prs_merge_rebase(runner, mock_token):
     """prs merge --method rebase uses rebase method."""
-    merge_result = {"sha": "abc1234def5678", "merged": True, "message": "Pull Request successfully merged"}
+    merge_result = {
+        "sha": "abc1234def5678",
+        "merged": True,
+        "message": "Pull Request successfully merged",
+    }
     with patch("ghcli.client.GitHubClient.put", return_value=merge_result) as mock_put:
         result = runner.invoke(
             cli,
@@ -193,6 +225,7 @@ def test_prs_merge_with_message(runner, mock_token):
 def test_prs_merge_api_error(runner, mock_token):
     """prs merge shows error when PR is not mergeable."""
     from ghcli.client import GitHubAPIError
+
     with patch(
         "ghcli.client.GitHubClient.put",
         side_effect=GitHubAPIError("Pull Request is not mergeable", 405),

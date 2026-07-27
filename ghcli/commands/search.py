@@ -1,11 +1,13 @@
 """Search command — search repos, issues, code, and users on GitHub."""
+
 from __future__ import annotations
 
 import json
+
 import click
+from rich import box
 from rich.console import Console
 from rich.table import Table
-from rich import box
 
 from ghcli.client import GitHubAPIError, GitHubClient
 
@@ -26,7 +28,13 @@ def search():
 @search.command("repos")
 @click.argument("query")
 @click.option("--language", "-l", default=None, help="Filter by programming language.")
-@click.option("--sort", "-s", default="best-match", type=click.Choice(["best-match", "stars", "forks", "updated"]), help="Sort order.")
+@click.option(
+    "--sort",
+    "-s",
+    default="best-match",
+    type=click.Choice(["best-match", "stars", "forks", "updated"]),
+    help="Sort order.",
+)
 @click.option("--limit", "-n", default=10, show_default=True, help="Max results.")
 @click.option("--json", "as_json", is_flag=True, help="Output raw JSON.")
 def search_repos(query: str, language: str | None, sort: str, limit: int, as_json: bool) -> None:
@@ -35,7 +43,9 @@ def search_repos(query: str, language: str | None, sort: str, limit: int, as_jso
     q = query
     if language:
         q += f" language:{language}"
-    data = client.get("/search/repositories", params={"q": q, "sort": sort, "per_page": min(limit, 100)})
+    data = client.get(
+        "/search/repositories", params={"q": q, "sort": sort, "per_page": min(limit, 100)}
+    )
     items = data.get("items", [])[:limit]
     if as_json:
         click.echo(json.dumps(items, indent=2))
@@ -58,13 +68,20 @@ def search_repos(query: str, language: str | None, sort: str, limit: int, as_jso
 
 @search.command("issues")
 @click.argument("query")
-@click.option("--sort", "-s", default="best-match", type=click.Choice(["best-match", "created", "updated", "comments"]))
+@click.option(
+    "--sort",
+    "-s",
+    default="best-match",
+    type=click.Choice(["best-match", "created", "updated", "comments"]),
+)
 @click.option("--limit", "-n", default=10, show_default=True)
 @click.option("--json", "as_json", is_flag=True)
 def search_issues(query: str, sort: str, limit: int, as_json: bool) -> None:
     """Search GitHub issues and pull requests."""
     client = _client()
-    data = client.get("/search/issues", params={"q": query, "sort": sort, "per_page": min(limit, 100)})
+    data = client.get(
+        "/search/issues", params={"q": query, "sort": sort, "per_page": min(limit, 100)}
+    )
     items = data.get("items", [])[:limit]
     if as_json:
         click.echo(json.dumps(items, indent=2))
@@ -118,5 +135,9 @@ def search_code(query: str, limit: int, as_json: bool) -> None:
     table.add_column("Repo")
     table.add_column("URL")
     for c in items:
-        table.add_row(c.get("name", ""), c.get("repository", {}).get("full_name", ""), c.get("html_url", "")[:60])
+        table.add_row(
+            c.get("name", ""),
+            c.get("repository", {}).get("full_name", ""),
+            c.get("html_url", "")[:60],
+        )
     console.print(table)

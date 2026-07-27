@@ -28,9 +28,11 @@ def auth() -> None:
 
 # ── setup ──────────────────────────────────────────────────────────────────
 
+
 @auth.command("setup")
 @click.option(
-    "--token", "-t",
+    "--token",
+    "-t",
     default=None,
     help="GitHub PAT (omit to be prompted securely).",
 )
@@ -85,6 +87,7 @@ def auth_setup(token: str | None) -> None:
 
 # ── status ─────────────────────────────────────────────────────────────────
 
+
 @auth.command("status")
 def auth_status() -> None:
     """Show current authentication status."""
@@ -116,12 +119,11 @@ def auth_status() -> None:
     table.add_row("Followers", str(user.get("followers", 0)))
     table.add_row("Following", str(user.get("following", 0)))
     table.add_row("Account URL", user.get("html_url", ""))
-    console.print(
-        Panel(table, title="[bold cyan]Auth Status[/bold cyan]", border_style="cyan")
-    )
+    console.print(Panel(table, title="[bold cyan]Auth Status[/bold cyan]", border_style="cyan"))
 
 
 # ── logout ─────────────────────────────────────────────────────────────────
+
 
 @auth.command("logout")
 @click.option("--yes", "-y", is_flag=True, help="Skip confirmation prompt.")

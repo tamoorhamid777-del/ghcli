@@ -1,4 +1,5 @@
 """Shell completion command — output completion scripts for bash/zsh/fish."""
+
 from __future__ import annotations
 
 import os

@@ -1,11 +1,13 @@
 """Org command — list organizations, members, and repos."""
+
 from __future__ import annotations
 
 import json
+
 import click
+from rich import box
 from rich.console import Console
 from rich.table import Table
-from rich import box
 
 from ghcli.client import GitHubAPIError, GitHubClient
 
@@ -52,7 +54,9 @@ def org_list(limit: int, as_json: bool) -> None:
 def org_members(org_name: str, role: str, limit: int, as_json: bool) -> None:
     """List members of ORG_NAME."""
     client = _client()
-    items = client.get(f"/orgs/{org_name}/members", params={"role": role, "per_page": min(limit, 100)})
+    items = client.get(
+        f"/orgs/{org_name}/members", params={"role": role, "per_page": min(limit, 100)}
+    )
     if isinstance(items, list):
         items = items[:limit]
     if as_json:
@@ -69,8 +73,15 @@ def org_members(org_name: str, role: str, limit: int, as_json: bool) -> None:
 
 @org.command("repos")
 @click.argument("org_name")
-@click.option("--type", "repo_type", default="all", type=click.Choice(["all", "public", "private", "forks", "sources"]))
-@click.option("--sort", default="updated", type=click.Choice(["created", "updated", "pushed", "full_name"]))
+@click.option(
+    "--type",
+    "repo_type",
+    default="all",
+    type=click.Choice(["all", "public", "private", "forks", "sources"]),
+)
+@click.option(
+    "--sort", default="updated", type=click.Choice(["created", "updated", "pushed", "full_name"])
+)
 @click.option("--limit", "-n", default=20, show_default=True)
 @click.option("--json", "as_json", is_flag=True)
 def org_repos(org_name: str, repo_type: str, sort: str, limit: int, as_json: bool) -> None:

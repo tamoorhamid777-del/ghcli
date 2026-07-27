@@ -1,12 +1,14 @@
 """Gist command — create, list, view, and delete GitHub Gists."""
+
 from __future__ import annotations
 
 import json
+
 import click
-from rich.console import Console
-from rich.table import Table
-from rich.syntax import Syntax
 from rich import box
+from rich.console import Console
+from rich.syntax import Syntax
+from rich.table import Table
 
 from ghcli.client import GitHubAPIError, GitHubClient
 
@@ -64,7 +66,9 @@ def gist_view(gist_id: str, as_json: bool) -> None:
         click.echo(json.dumps(g, indent=2))
         return
     console.print(f"[bold cyan]{g.get('description') or '(no description)'}[/bold cyan]")
-    console.print(f"[dim]ID: {g['id']} | Public: {g.get('public')} | Updated: {g.get('updated_at', '')[:10]}[/dim]\n")
+    console.print(
+        f"[dim]ID: {g['id']} | Public: {g.get('public')} | Updated: {g.get('updated_at', '')[:10]}[/dim]\n"
+    )
     for fname, fdata in g.get("files", {}).items():
         console.print(f"[bold yellow]── {fname} ──[/bold yellow]")
         lang = fdata.get("language") or "text"

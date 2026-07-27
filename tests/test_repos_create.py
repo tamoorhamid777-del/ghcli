@@ -1,4 +1,5 @@
 """Tests for ghcli repos create / delete / fork / clone commands."""
+
 from __future__ import annotations
 
 import json
@@ -58,7 +59,12 @@ def test_repos_create_public(runner, mock_token):
 
 def test_repos_create_private(runner, mock_token):
     """repos create --private creates a private repo."""
-    private_repo = {**MOCK_REPO, "private": True, "name": "secret-repo", "full_name": "testuser/secret-repo"}
+    private_repo = {
+        **MOCK_REPO,
+        "private": True,
+        "name": "secret-repo",
+        "full_name": "testuser/secret-repo",
+    }
     with patch("ghcli.client.GitHubClient.post", return_value=private_repo):
         result = runner.invoke(
             cli,
@@ -84,6 +90,7 @@ def test_repos_create_with_gitignore(runner, mock_token):
 def test_repos_create_api_error(runner, mock_token):
     """repos create shows error on API failure."""
     from ghcli.client import GitHubAPIError
+
     with patch(
         "ghcli.client.GitHubClient.post",
         side_effect=GitHubAPIError("Repository already exists", 422),
@@ -120,6 +127,7 @@ def test_repos_delete_abort(runner, mock_token):
 def test_repos_delete_api_error(runner, mock_token):
     """repos delete shows error on API failure."""
     from ghcli.client import GitHubAPIError
+
     with patch(
         "ghcli.client.GitHubClient.delete",
         side_effect=GitHubAPIError("Must have admin rights", 403),

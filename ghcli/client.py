@@ -24,13 +24,16 @@ from ghcli.auth_store import load_token
 _CACHE: dict[str, tuple[Any, float]] = {}
 _CACHE_TTL = 30  # seconds — GET responses cached for 30s by default
 
+
 def _cache_key(method: str, url: str, params: dict | None) -> str:
     raw = f"{method}:{url}:{sorted((params or {}).items())}"
-    return hashlib.md5(raw.encode()).hexdigest()
+    return hashlib.md5(raw.encode(), usedforsecurity=False).hexdigest()  # noqa: S324
+
 
 def clear_cache() -> None:
     """Clear the in-process response cache."""
     _CACHE.clear()
+
 
 GITHUB_API = "https://api.github.com"
 DEFAULT_TIMEOUT = 20  # seconds
@@ -99,8 +102,7 @@ class GitHubClient:
             errors = body.get("errors", [])
             if errors:
                 details = "; ".join(
-                    e.get("message", str(e)) if isinstance(e, dict) else str(e)
-                    for e in errors
+                    e.get("message", str(e)) if isinstance(e, dict) else str(e) for e in errors
                 )
                 message = f"{message} — {details}"
         except Exception:
@@ -145,8 +147,13 @@ class GitHubClient:
                     status_code = 200
                     content = b"cached"
                     headers: dict = {}
-                    def json(self_inner): return cached[0]
-                    def text(self_inner): return str(cached[0])
+
+                    def json(self_inner):
+                        return cached[0]
+
+                    def text(self_inner):
+                        return str(cached[0])
+
                 return _CachedResp()
 
         # Retry with exponential backoff
@@ -262,11 +269,7 @@ class GitHubClient:
                 yield from data
             elif isinstance(data, dict):
                 # Some endpoints wrap items (e.g. search results)
-                items = (
-                    data.get("items")
-                    or data.get("workflows")
-                    or data.get("jobs")
-                )
+                items = data.get("items") or data.get("workflows") or data.get("jobs")
                 if items is not None:
                     yield from items
                 else:

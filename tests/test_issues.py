@@ -1,4 +1,5 @@
 """Tests for ghcli issues commands (list, view, create, close, reopen)."""
+
 from __future__ import annotations
 
 import json
@@ -115,6 +116,7 @@ class TestIssuesList:
 
     def test_list_api_error(self, runner, mock_client):
         from ghcli.client import GitHubAPIError
+
         mock_client.require_auth.return_value = None
         mock_client.paginate.side_effect = GitHubAPIError("Not Found", 404)
         result = runner.invoke(issues, ["list", "owner/repo"])
@@ -152,6 +154,7 @@ class TestIssuesView:
 
     def test_view_api_error(self, runner, mock_client):
         from ghcli.client import GitHubAPIError
+
         mock_client.require_auth.return_value = None
         mock_client.get.side_effect = GitHubAPIError("Not Found", 404)
         result = runner.invoke(issues, ["view", "owner/repo", "999"])
@@ -188,7 +191,14 @@ class TestIssuesCreate:
         }
         result = runner.invoke(
             issues,
-            ["create", "owner/repo", "--title", "Issue with body", "--body", "Detailed description"],
+            [
+                "create",
+                "owner/repo",
+                "--title",
+                "Issue with body",
+                "--body",
+                "Detailed description",
+            ],
         )
         assert result.exit_code == 0
 
@@ -208,6 +218,7 @@ class TestIssuesCreate:
 
     def test_create_api_error(self, runner, mock_client):
         from ghcli.client import GitHubAPIError
+
         mock_client.require_auth.return_value = None
         mock_client.post.side_effect = GitHubAPIError("Unprocessable Entity", 422)
         result = runner.invoke(
@@ -247,6 +258,7 @@ class TestIssuesClose:
 
     def test_close_api_error(self, runner, mock_client):
         from ghcli.client import GitHubAPIError
+
         mock_client.require_auth.return_value = None
         mock_client.patch.side_effect = GitHubAPIError("Not Found", 404)
         result = runner.invoke(issues, ["close", "owner/repo", "999"])
@@ -271,6 +283,7 @@ class TestIssuesReopen:
 
     def test_reopen_api_error(self, runner, mock_client):
         from ghcli.client import GitHubAPIError
+
         mock_client.require_auth.return_value = None
         mock_client.patch.side_effect = GitHubAPIError("Not Found", 404)
         result = runner.invoke(issues, ["reopen", "owner/repo", "999"])

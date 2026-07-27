@@ -1,4 +1,5 @@
 """Tests for ghcli comments command."""
+
 from __future__ import annotations
 
 import json
@@ -64,6 +65,7 @@ def test_comments_create_json(runner, mock_token):
 def test_comments_create_api_error(runner, mock_token):
     """comments create shows error on API failure."""
     from ghcli.client import GitHubAPIError
+
     with patch(
         "ghcli.client.GitHubClient.post",
         side_effect=GitHubAPIError("Not Found", 404),

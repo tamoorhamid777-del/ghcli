@@ -1,4 +1,5 @@
 """ghcli — GitHub CLI entry point. Registers all command groups."""
+
 from __future__ import annotations
 
 import click
@@ -8,27 +9,27 @@ from ghcli import __version__
 
 # Core commands
 from ghcli.commands.auth import auth
-from ghcli.commands.repos import repos
-from ghcli.commands.issues import issues
-from ghcli.commands.prs import prs
-from ghcli.commands.commits import commits
-from ghcli.commands.files import files
-from ghcli.commands.skills import skills
-
-# v1.1.0 commands
-from ghcli.commands.search import search
-from ghcli.commands.gist import gist
-from ghcli.commands.release import release
-from ghcli.commands.org import org
-from ghcli.commands.notifications import notifications
-from ghcli.commands.star import star
-from ghcli.commands.status import status
 
 # v1.2.0 commands
 from ghcli.commands.comments import comments
+from ghcli.commands.commits import commits
 
 # v1.2.1 commands
 from ghcli.commands.completions import completions
+from ghcli.commands.files import files
+from ghcli.commands.gist import gist
+from ghcli.commands.issues import issues
+from ghcli.commands.notifications import notifications
+from ghcli.commands.org import org
+from ghcli.commands.prs import prs
+from ghcli.commands.release import release
+from ghcli.commands.repos import repos
+
+# v1.1.0 commands
+from ghcli.commands.search import search
+from ghcli.commands.skills import skills
+from ghcli.commands.star import star
+from ghcli.commands.status import status
 
 console = Console()
 

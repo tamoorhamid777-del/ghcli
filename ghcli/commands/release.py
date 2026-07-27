@@ -1,11 +1,13 @@
 """Release command — list, create, and download GitHub releases."""
+
 from __future__ import annotations
 
 import json
+
 import click
+from rich import box
 from rich.console import Console
 from rich.table import Table
-from rich import box
 
 from ghcli.client import GitHubAPIError, GitHubClient
 
@@ -62,7 +64,9 @@ def release_list(repo: str, limit: int, as_json: bool) -> None:
 @click.option("--body", "-b", default="", help="Release notes.")
 @click.option("--draft", is_flag=True, default=False)
 @click.option("--prerelease", is_flag=True, default=False)
-def release_create(repo: str, tag: str, name: str | None, body: str, draft: bool, prerelease: bool) -> None:
+def release_create(
+    repo: str, tag: str, name: str | None, body: str, draft: bool, prerelease: bool
+) -> None:
     """Create a release for REPO at TAG."""
     client = _client()
     payload = {
@@ -89,7 +93,9 @@ def release_view(repo: str, tag: str, as_json: bool) -> None:
         click.echo(json.dumps(r, indent=2))
         return
     console.print(f"[bold cyan]{r.get('name') or r.get('tag_name')}[/bold cyan]")
-    console.print(f"[dim]Tag: {r.get('tag_name')} | Published: {r.get('published_at', '')[:10]}[/dim]")
+    console.print(
+        f"[dim]Tag: {r.get('tag_name')} | Published: {r.get('published_at', '')[:10]}[/dim]"
+    )
     console.print(f"[dim]URL: {r.get('html_url')}[/dim]\n")
     if r.get("body"):
         console.print(r["body"])
@@ -107,7 +113,8 @@ def release_view(repo: str, tag: str, as_json: bool) -> None:
 @click.option("--asset", "-a", default=None, help="Asset name to download (default: first asset).")
 def release_download(repo: str, tag: str, asset: str | None) -> None:
     """Download a release asset from REPO at TAG."""
-    import urllib.request
+    import requests
+
     client = _client()
     r = client.get(f"/repos/{repo}/releases/tags/{tag}")
     assets = r.get("assets", [])
@@ -118,5 +125,9 @@ def release_download(repo: str, tag: str, asset: str | None) -> None:
     url = target["browser_download_url"]
     fname = target["name"]
     console.print(f"Downloading [cyan]{fname}[/cyan] …")
-    urllib.request.urlretrieve(url, fname)
+    with requests.get(url, stream=True, timeout=30) as resp:
+        resp.raise_for_status()
+        with open(fname, "wb") as f:
+            for chunk in resp.iter_content(chunk_size=8192):
+                f.write(chunk)
     console.print(f"[green]✓ Saved to {fname}[/green]")

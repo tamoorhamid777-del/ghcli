@@ -1,4 +1,5 @@
 """Tests for ghcli commits commands."""
+
 from __future__ import annotations
 
 import json
@@ -49,13 +50,23 @@ MOCK_COMMIT_DETAIL = {
     "commit": {
         "message": "feat: add new feature\n\nDetailed description here.",
         "author": {"name": "Alice", "date": "2024-07-01T10:00:00Z", "email": "alice@example.com"},
-        "committer": {"name": "Alice", "date": "2024-07-01T10:00:00Z", "email": "alice@example.com"},
+        "committer": {
+            "name": "Alice",
+            "date": "2024-07-01T10:00:00Z",
+            "email": "alice@example.com",
+        },
     },
     "author": {"login": "alice"},
     "html_url": "https://github.com/owner/repo/commit/abc1234567890abcdef",
     "stats": {"additions": 10, "deletions": 2, "total": 12},
     "files": [
-        {"filename": "src/main.py", "status": "modified", "additions": 10, "deletions": 2, "changes": 12}
+        {
+            "filename": "src/main.py",
+            "status": "modified",
+            "additions": 10,
+            "deletions": 2,
+            "changes": 12,
+        }
     ],
     "parents": [{"sha": "parent123"}],
 }
@@ -114,6 +125,7 @@ class TestCommitsList:
 
     def test_list_api_error(self, runner, mock_client):
         from ghcli.client import GitHubAPIError
+
         mock_client.require_auth.return_value = None
         mock_client.paginate.side_effect = GitHubAPIError("Not Found", 404)
         result = runner.invoke(commits, ["list", "owner/repo"])
@@ -137,6 +149,7 @@ class TestCommitsView:
 
     def test_view_api_error(self, runner, mock_client):
         from ghcli.client import GitHubAPIError
+
         mock_client.require_auth.return_value = None
         mock_client.get.side_effect = GitHubAPIError("Not Found", 404)
         result = runner.invoke(commits, ["view", "owner/repo", "badsha"])
@@ -168,6 +181,7 @@ class TestCommitsCompare:
 
     def test_compare_api_error(self, runner, mock_client):
         from ghcli.client import GitHubAPIError
+
         mock_client.require_auth.return_value = None
         mock_client.get.side_effect = GitHubAPIError("Not Found", 404)
         result = runner.invoke(commits, ["compare", "owner/repo", "main", "nonexistent"])

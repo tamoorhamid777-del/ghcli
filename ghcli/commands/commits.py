@@ -33,6 +33,7 @@ def commits() -> None:
 
 # ── list ───────────────────────────────────────────────────────────────────
 
+
 @commits.command("list")
 @click.argument("repo")
 @click.option("--branch", "-b", default=None, help="Branch/tag/SHA (default: repo default branch).")
@@ -78,6 +79,7 @@ def commits_list(
 
     if output_json:
         import json as _json
+
         console.print(_json.dumps(items, indent=2))
         return
 
@@ -97,9 +99,8 @@ def commits_list(
         sha = commit["sha"][:7]
         msg_lines = (commit["commit"]["message"] or "").splitlines()
         subject = msg_lines[0][:72] if msg_lines else "—"
-        author_name = (
-            (commit.get("author") or {}).get("login")
-            or commit["commit"]["author"].get("name", "—")
+        author_name = (commit.get("author") or {}).get("login") or commit["commit"]["author"].get(
+            "name", "—"
         )
         date = (commit["commit"]["author"].get("date") or "")[:10]
         table.add_row(sha, subject, author_name, date)
@@ -108,6 +109,7 @@ def commits_list(
 
 
 # ── view ───────────────────────────────────────────────────────────────────
+
 
 @commits.command("view")
 @click.argument("repo")
@@ -145,9 +147,7 @@ def commits_view(repo: str, sha: str) -> None:
     )
 
     # Full commit message
-    console.print(
-        Panel(git["message"], title="[dim]Commit Message[/dim]", border_style="dim")
-    )
+    console.print(Panel(git["message"], title="[dim]Commit Message[/dim]", border_style="dim"))
 
     # Changed files
     if files:
@@ -174,6 +174,7 @@ def commits_view(repo: str, sha: str) -> None:
 
 
 # ── compare ────────────────────────────────────────────────────────────────
+
 
 @commits.command("compare")
 @click.argument("repo")
@@ -209,9 +210,8 @@ def commits_compare(repo: str, base: str, head: str) -> None:
         for commit in commits_data:
             sha = commit["sha"][:7]
             msg = (commit["commit"]["message"] or "").splitlines()[0][:72]
-            author = (
-                (commit.get("author") or {}).get("login")
-                or commit["commit"]["author"].get("name", "—")
+            author = (commit.get("author") or {}).get("login") or commit["commit"]["author"].get(
+                "name", "—"
             )
             table.add_row(sha, msg, author)
         console.print(table)

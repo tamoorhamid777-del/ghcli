@@ -1,10 +1,22 @@
 """Tests for ghcli star commands."""
+
 from __future__ import annotations
+
 from unittest.mock import MagicMock, patch
+
 from click.testing import CliRunner
+
 from ghcli.commands.star import star
 
-MOCK_STARRED = [{"full_name": "owner/repo", "stargazers_count": 100, "language": "Python", "description": "A cool repo"}]
+MOCK_STARRED = [
+    {
+        "full_name": "owner/repo",
+        "stargazers_count": 100,
+        "language": "Python",
+        "description": "A cool repo",
+    }
+]
+
 
 def make_client(get_val=None):
     client = MagicMock()
@@ -12,6 +24,7 @@ def make_client(get_val=None):
     client.put.return_value = None
     client.delete.return_value = None
     return client
+
 
 def test_star_list():
     runner = CliRunner()
@@ -21,6 +34,7 @@ def test_star_list():
     assert result.exit_code == 0
     assert "owner/repo" in result.output
 
+
 def test_star_list_json():
     runner = CliRunner()
     with patch("ghcli.commands.star.GitHubClient") as MockClient:
@@ -29,6 +43,7 @@ def test_star_list_json():
     assert result.exit_code == 0
     assert "owner/repo" in result.output
 
+
 def test_star_add():
     runner = CliRunner()
     with patch("ghcli.commands.star.GitHubClient") as MockClient:
@@ -36,6 +51,7 @@ def test_star_add():
         result = runner.invoke(star, ["add", "owner/repo"])
     assert result.exit_code == 0
     assert "Starred" in result.output
+
 
 def test_star_remove():
     runner = CliRunner()

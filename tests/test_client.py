@@ -1,4 +1,5 @@
 """Tests for ghcli.client — caching, retry, pagination, error handling."""
+
 from __future__ import annotations
 
 import time
@@ -8,9 +9,9 @@ import pytest
 import requests
 
 from ghcli.client import (
+    _CACHE,
     GitHubAPIError,
     GitHubClient,
-    _CACHE,
     _cache_key,
     clear_cache,
 )
@@ -87,6 +88,7 @@ class TestGitHubClientInit:
         with patch("ghcli.client.load_token", return_value=None):
             c = GitHubClient(token=None)
         from ghcli.client import GitHubAPIError
+
         with pytest.raises(GitHubAPIError):
             c.require_auth()
 
@@ -129,6 +131,7 @@ class TestGitHubClientGet:
         mock_resp.content = b'{"login": "testuser"}'
         mock_resp.ok = True
         import ghcli.client as client_module
+
         original_ttl = client_module._CACHE_TTL
         try:
             client_module._CACHE_TTL = 0  # expire immediately

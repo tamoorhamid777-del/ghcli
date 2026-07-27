@@ -1,4 +1,5 @@
 """Tests for ghcli files commands."""
+
 from __future__ import annotations
 
 import json
@@ -94,6 +95,7 @@ class TestFilesList:
 
     def test_list_api_error(self, runner, mock_client):
         from ghcli.client import GitHubAPIError
+
         mock_client.require_auth.return_value = None
         mock_client.get.side_effect = GitHubAPIError("Not Found", 404)
         result = runner.invoke(files, ["list", "owner/repo"])
@@ -121,6 +123,7 @@ class TestFilesView:
 
     def test_view_api_error(self, runner, mock_client):
         from ghcli.client import GitHubAPIError
+
         mock_client.require_auth.return_value = None
         mock_client.get.side_effect = GitHubAPIError("Not Found", 404)
         result = runner.invoke(files, ["view", "owner/repo", "nonexistent.md"])
@@ -144,7 +147,10 @@ class TestFilesWrite:
         mock_client.get.return_value = None  # file doesn't exist yet
         mock_client.post.return_value = {
             "content": {"path": "newfile.md", "sha": "newsha"},
-            "commit": {"sha": "commitsha", "html_url": "https://github.com/owner/repo/commit/commitsha"},
+            "commit": {
+                "sha": "commitsha",
+                "html_url": "https://github.com/owner/repo/commit/commitsha",
+            },
         }
         result = runner.invoke(
             files,
@@ -203,6 +209,7 @@ class TestFilesTree:
 
     def test_tree_api_error(self, runner, mock_client):
         from ghcli.client import GitHubAPIError
+
         mock_client.require_auth.return_value = None
         mock_client.get.side_effect = GitHubAPIError("Not Found", 404)
         result = runner.invoke(files, ["tree", "owner/repo"])

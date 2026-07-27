@@ -47,11 +47,13 @@ def repos() -> None:
 
 # ── list ───────────────────────────────────────────────────────────────────
 
+
 @repos.command("list")
 @click.option("--user", "-u", default=None, help="GitHub username (default: authenticated user).")
 @click.option("--org", "-o", default=None, help="Organization name.")
 @click.option(
-    "--type", "repo_type",
+    "--type",
+    "repo_type",
     default="all",
     type=click.Choice(["all", "owner", "member", "public", "private", "forks", "sources"]),
     show_default=True,
@@ -65,7 +67,9 @@ def repos() -> None:
 )
 @click.option("--limit", "-n", default=30, show_default=True, help="Max repos to show.")
 @click.option("--json", "output_json", is_flag=True, default=False, help="Output raw JSON.")
-def repos_list(user: str | None, org: str | None, repo_type: str, sort: str, limit: int, output_json: bool) -> None:
+def repos_list(
+    user: str | None, org: str | None, repo_type: str, sort: str, limit: int, output_json: bool
+) -> None:
     """List repositories for the authenticated user, a specific user, or an org."""
     c = _client()
     try:
@@ -90,6 +94,7 @@ def repos_list(user: str | None, org: str | None, repo_type: str, sort: str, lim
 
     if output_json:
         import json as _json
+
         console.print(_json.dumps(items, indent=2))
         return
 
@@ -125,6 +130,7 @@ def repos_list(user: str | None, org: str | None, repo_type: str, sort: str, lim
 
 
 # ── view ───────────────────────────────────────────────────────────────────
+
 
 @repos.command("view")
 @click.argument("repo")
@@ -169,14 +175,21 @@ def repos_view(repo: str) -> None:
 
 # ── create ─────────────────────────────────────────────────────────────────
 
+
 @repos.command("create")
 @click.argument("name")
 @click.option("--description", "-d", default="", help="Repository description.")
 @click.option("--private/--public", default=False, show_default=True, help="Visibility.")
-@click.option("--auto-init/--no-auto-init", default=True, show_default=True, help="Initialize with README.")
+@click.option(
+    "--auto-init/--no-auto-init", default=True, show_default=True, help="Initialize with README."
+)
 @click.option("--gitignore", default=None, help="Gitignore template (e.g. Python, Node).")
-@click.option("--license", "license_template", default=None, help="License template (e.g. mit, apache-2.0).")
-@click.option("--org", "-o", default=None, help="Create under an organization instead of your account.")
+@click.option(
+    "--license", "license_template", default=None, help="License template (e.g. mit, apache-2.0)."
+)
+@click.option(
+    "--org", "-o", default=None, help="Create under an organization instead of your account."
+)
 def repos_create(
     name: str,
     description: str,
@@ -224,6 +237,7 @@ def repos_create(
 
 # ── delete ─────────────────────────────────────────────────────────────────
 
+
 @repos.command("delete")
 @click.argument("repo")
 @click.option("--yes", "-y", is_flag=True, help="Skip confirmation prompt.")
@@ -252,6 +266,7 @@ def repos_delete(repo: str, yes: bool) -> None:
 
 
 # ── clone ──────────────────────────────────────────────────────────────────
+
 
 @repos.command("clone")
 @click.argument("repo")
@@ -292,6 +307,7 @@ def repos_clone(repo: str, dest: str | None, ssh: bool, depth: int | None) -> No
 
 
 # ── fork ───────────────────────────────────────────────────────────────────
+
 
 @repos.command("fork")
 @click.argument("repo")

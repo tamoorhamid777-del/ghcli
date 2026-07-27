@@ -2,9 +2,10 @@
 Shared pytest fixtures for ghcli tests.
 """
 
+from unittest.mock import patch
+
 import pytest
 from click.testing import CliRunner
-from unittest.mock import patch
 
 
 @pytest.fixture

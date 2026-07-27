@@ -1,4 +1,5 @@
 """Tests for ghcli issues create / close / reopen / comment commands."""
+
 from __future__ import annotations
 
 import json
@@ -57,9 +58,13 @@ def test_issues_create_with_body(runner, mock_token):
         result = runner.invoke(
             cli,
             [
-                "issues", "create", "owner/repo",
-                "--title", "Fix the bug",
-                "--body", "Detailed description here",
+                "issues",
+                "create",
+                "owner/repo",
+                "--title",
+                "Fix the bug",
+                "--body",
+                "Detailed description here",
             ],
         )
     assert result.exit_code == 0
@@ -73,10 +78,15 @@ def test_issues_create_with_labels(runner, mock_token):
         result = runner.invoke(
             cli,
             [
-                "issues", "create", "owner/repo",
-                "--title", "Bug",
-                "--label", "bug",
-                "--label", "help wanted",
+                "issues",
+                "create",
+                "owner/repo",
+                "--title",
+                "Bug",
+                "--label",
+                "bug",
+                "--label",
+                "help wanted",
             ],
         )
     assert result.exit_code == 0
@@ -91,10 +101,15 @@ def test_issues_create_with_assignees(runner, mock_token):
         result = runner.invoke(
             cli,
             [
-                "issues", "create", "owner/repo",
-                "--title", "Task",
-                "--assignee", "alice",
-                "--assignee", "bob",
+                "issues",
+                "create",
+                "owner/repo",
+                "--title",
+                "Task",
+                "--assignee",
+                "alice",
+                "--assignee",
+                "bob",
             ],
         )
     assert result.exit_code == 0
@@ -113,6 +128,7 @@ def test_issues_create_missing_title(runner, mock_token):
 def test_issues_create_api_error(runner, mock_token):
     """issues create shows error on API failure."""
     from ghcli.client import GitHubAPIError
+
     with patch(
         "ghcli.client.GitHubClient.post",
         side_effect=GitHubAPIError("Validation Failed", 422),

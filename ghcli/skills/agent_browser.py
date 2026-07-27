@@ -61,11 +61,12 @@ console = Console()
 
 # ── Action log ────────────────────────────────────────────────────────────────
 
+
 @dataclass
 class BrowserAction:
-    action: str          # navigate | click | fill | wait | screenshot | extract
-    target: str = ""     # URL or CSS selector
-    value: str = ""      # fill value or empty
+    action: str  # navigate | click | fill | wait | screenshot | extract
+    target: str = ""  # URL or CSS selector
+    value: str = ""  # fill value or empty
     timestamp: float = field(default_factory=time.time)
     success: bool = True
     error: str = ""
@@ -83,6 +84,7 @@ class BrowserAction:
 
 
 # ── Abstract backend ──────────────────────────────────────────────────────────
+
 
 class BrowserBackend(abc.ABC):
     """Abstract interface that both Playwright and Selenium adapters implement."""
@@ -139,6 +141,7 @@ class BrowserBackend(abc.ABC):
 
 
 # ── Playwright backend ────────────────────────────────────────────────────────
+
 
 class PlaywrightBackend(BrowserBackend):
     """Playwright-based browser backend (async API wrapped synchronously)."""
@@ -200,7 +203,7 @@ class PlaywrightBackend(BrowserBackend):
     def screenshot(self, path: Optional[str] = None) -> str:
         assert self._page
         if path is None:
-            path = f"/tmp/ghcli_screenshot_{int(time.time())}.png"
+            path = f"/tmp/ghcli_screenshot_{int(time.time())}.png"  # nosec B108
         self._page.screenshot(path=path, full_page=True)
         return path
 
@@ -229,6 +232,7 @@ class PlaywrightBackend(BrowserBackend):
 
 # ── Selenium backend ──────────────────────────────────────────────────────────
 
+
 class SeleniumBackend(BrowserBackend):
     """Selenium WebDriver backend (Chrome/Chromium)."""
 
@@ -241,9 +245,7 @@ class SeleniumBackend(BrowserBackend):
             from selenium.webdriver.chrome.options import Options
             from selenium.webdriver.chrome.service import Service
         except ImportError:
-            raise RuntimeError(
-                "Selenium not installed. Run: pip install selenium"
-            )
+            raise RuntimeError("Selenium not installed. Run: pip install selenium")
         opts = Options()
         if headless:
             opts.add_argument("--headless=new")
@@ -262,11 +264,13 @@ class SeleniumBackend(BrowserBackend):
 
     def click(self, selector: str) -> None:
         from selenium.webdriver.common.by import By
+
         assert self._driver
         self._driver.find_element(By.CSS_SELECTOR, selector).click()
 
     def fill(self, selector: str, value: str) -> None:
         from selenium.webdriver.common.by import By
+
         assert self._driver
         el = self._driver.find_element(By.CSS_SELECTOR, selector)
         el.clear()
@@ -274,8 +278,9 @@ class SeleniumBackend(BrowserBackend):
 
     def wait_for_selector(self, selector: str, timeout: float = 10.0) -> None:
         from selenium.webdriver.common.by import By
-        from selenium.webdriver.support.ui import WebDriverWait
         from selenium.webdriver.support import expected_conditions as EC
+        from selenium.webdriver.support.ui import WebDriverWait
+
         assert self._driver
         WebDriverWait(self._driver, timeout).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, selector))
@@ -291,17 +296,19 @@ class SeleniumBackend(BrowserBackend):
     def screenshot(self, path: Optional[str] = None) -> str:
         assert self._driver
         if path is None:
-            path = f"/tmp/ghcli_screenshot_{int(time.time())}.png"
+            path = f"/tmp/ghcli_screenshot_{int(time.time())}.png"  # nosec B108
         self._driver.save_screenshot(path)
         return path
 
     def extract_text(self, selector: str) -> List[str]:
         from selenium.webdriver.common.by import By
+
         assert self._driver
         return [el.text for el in self._driver.find_elements(By.CSS_SELECTOR, selector)]
 
     def extract_attribute(self, selector: str, attribute: str) -> List[str]:
         from selenium.webdriver.common.by import By
+
         assert self._driver
         return [
             el.get_attribute(attribute) or ""
@@ -323,6 +330,7 @@ class SeleniumBackend(BrowserBackend):
 
 # ── Session context manager ───────────────────────────────────────────────────
 
+
 class BrowserSession:
     """
     Wraps a BrowserBackend lifecycle and records all actions.
@@ -337,8 +345,9 @@ class BrowserSession:
         self._headless = headless
         self.actions: List[BrowserAction] = []
 
-    def _record(self, action: str, target: str = "", value: str = "",
-                success: bool = True, error: str = "") -> None:
+    def _record(
+        self, action: str, target: str = "", value: str = "", success: bool = True, error: str = ""
+    ) -> None:
         self.actions.append(BrowserAction(action, target, value, success=success, error=error))
 
     def navigate(self, url: str) -> "BrowserSession":
@@ -406,11 +415,13 @@ class BrowserSession:
         return self._backend.title()
 
     def print_action_log(self) -> None:
-        console.print(Panel(
-            "\n".join(str(a) for a in self.actions),
-            title="[bold cyan]Browser Action Log[/bold cyan]",
-            border_style="cyan",
-        ))
+        console.print(
+            Panel(
+                "\n".join(str(a) for a in self.actions),
+                title="[bold cyan]Browser Action Log[/bold cyan]",
+                border_style="cyan",
+            )
+        )
 
     def __enter__(self) -> "BrowserSession":
         self._backend.start(headless=self._headless)
@@ -421,6 +432,7 @@ class BrowserSession:
 
 
 # ── High-level façade ─────────────────────────────────────────────────────────
+
 
 class AgentBrowser:
     """
@@ -442,11 +454,13 @@ class AgentBrowser:
     def _detect_backend() -> str:
         try:
             import playwright  # noqa: F401
+
             return "playwright"
         except ImportError:
             pass
         try:
             import selenium  # noqa: F401
+
             return "selenium"
         except ImportError:
             pass
@@ -528,9 +542,11 @@ class AgentBrowser:
         return result
 
     def print_backend_info(self) -> None:
-        console.print(Panel(
-            f"Backend: [bold cyan]{self._backend_name}[/bold cyan]\n"
-            f"Headless: [bold]{'yes' if self._headless else 'no'}[/bold]",
-            title="[bold cyan]AgentBrowser[/bold cyan]",
-            border_style="cyan",
-        ))
+        console.print(
+            Panel(
+                f"Backend: [bold cyan]{self._backend_name}[/bold cyan]\n"
+                f"Headless: [bold]{'yes' if self._headless else 'no'}[/bold]",
+                title="[bold cyan]AgentBrowser[/bold cyan]",
+                border_style="cyan",
+            )
+        )

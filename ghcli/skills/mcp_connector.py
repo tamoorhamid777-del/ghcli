@@ -41,15 +41,15 @@ import subprocess
 import threading
 import time
 import uuid
-from dataclasses import dataclass, field, asdict
+from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 import requests
+from rich import box
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
-from rich import box
 
 console = Console()
 
@@ -75,12 +75,13 @@ def _save_registry(data: Dict[str, dict]) -> None:
 
 # ── Data classes ─────────────────────────────────────────────────────────────
 
+
 @dataclass
 class MCPServerConfig:
     name: str
-    transport: str          # "stdio" | "http" | "sse"
-    command: List[str] = field(default_factory=list)   # for stdio
-    url: str = ""                                       # for http/sse
+    transport: str  # "stdio" | "http" | "sse"
+    command: List[str] = field(default_factory=list)  # for stdio
+    url: str = ""  # for http/sse
     env: Dict[str, str] = field(default_factory=dict)
     timeout: int = 30
     description: str = ""
@@ -111,6 +112,7 @@ class MCPToolResult:
 
 # ── Transport layer ───────────────────────────────────────────────────────────
 
+
 class MCPTransport:
     """
     Thin JSON-RPC 2.0 transport.
@@ -131,6 +133,7 @@ class MCPTransport:
     def _ensure_proc(self) -> subprocess.Popen:
         if self._proc is None or self._proc.poll() is not None:
             import os
+
             env = {**os.environ, **self.config.env}
             self._proc = subprocess.Popen(
                 self.config.command,
@@ -182,7 +185,9 @@ class MCPTransport:
                         return resp
                 except json.JSONDecodeError:
                     continue
-        raise TimeoutError(f"MCP stdio server '{self.config.name}' did not respond in {self.config.timeout}s")
+        raise TimeoutError(
+            f"MCP stdio server '{self.config.name}' did not respond in {self.config.timeout}s"
+        )
 
     # ── http ──────────────────────────────────────────────────────────────
 
@@ -224,6 +229,7 @@ class MCPTransport:
 
 # ── High-level connector ──────────────────────────────────────────────────────
 
+
 class MCPConnector:
     """
     High-level MCP façade.
@@ -237,8 +243,7 @@ class MCPConnector:
 
     def __init__(self):
         self._registry: Dict[str, MCPServerConfig] = {
-            name: MCPServerConfig.from_dict(d)
-            for name, d in _load_registry().items()
+            name: MCPServerConfig.from_dict(d) for name, d in _load_registry().items()
         }
         self._transports: Dict[str, MCPTransport] = {}
 
@@ -288,7 +293,9 @@ class MCPConnector:
 
     def get_server(self, name: str) -> MCPServerConfig:
         if name not in self._registry:
-            raise KeyError(f"MCP server '{name}' not registered. Run: ghcli skills mcp register --name {name}")
+            raise KeyError(
+                f"MCP server '{name}' not registered. Run: ghcli skills mcp register --name {name}"
+            )
         return self._registry[name]
 
     # ── Transport management ──────────────────────────────────────────────
@@ -320,18 +327,19 @@ class MCPConnector:
         error = resp.get("error")
         if error:
             return MCPToolResult(
-                tool=tool, server=server,
+                tool=tool,
+                server=server,
                 content=error.get("message", str(error)),
-                is_error=True, raw=resp,
+                is_error=True,
+                raw=resp,
             )
         # MCP result.content is a list of content blocks
         content_blocks = result.get("content", [])
-        text_parts = [
-            b.get("text", "") for b in content_blocks if b.get("type") == "text"
-        ]
+        text_parts = [b.get("text", "") for b in content_blocks if b.get("type") == "text"]
         content = "\n".join(text_parts) if text_parts else result
         return MCPToolResult(
-            tool=tool, server=server,
+            tool=tool,
+            server=server,
             content=content,
             is_error=result.get("isError", False),
             raw=resp,
@@ -356,12 +364,16 @@ class MCPConnector:
     def print_servers(self) -> None:
         servers = self.list_servers()
         if not servers:
-            console.print("[yellow]No MCP servers registered.[/yellow]  "
-                          "Run [bold]ghcli skills mcp register[/bold] to add one.")
+            console.print(
+                "[yellow]No MCP servers registered.[/yellow]  "
+                "Run [bold]ghcli skills mcp register[/bold] to add one."
+            )
             return
         table = Table(
             title="Registered MCP Servers",
-            box=box.ROUNDED, border_style="cyan", header_style="bold cyan",
+            box=box.ROUNDED,
+            border_style="cyan",
+            header_style="bold cyan",
         )
         table.add_column("Name", style="bold")
         table.add_column("Transport", width=10)
@@ -379,7 +391,9 @@ class MCPConnector:
             return
         table = Table(
             title=f"Tools on '{server}'",
-            box=box.ROUNDED, border_style="cyan", header_style="bold cyan",
+            box=box.ROUNDED,
+            border_style="cyan",
+            header_style="bold cyan",
         )
         table.add_column("Tool name", style="bold")
         table.add_column("Description")

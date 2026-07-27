@@ -56,6 +56,7 @@ def prs() -> None:
 
 # ── list ───────────────────────────────────────────────────────────────────
 
+
 @prs.command("list")
 @click.argument("repo")
 @click.option(
@@ -103,6 +104,7 @@ def prs_list(
 
     if output_json:
         import json as _json
+
         console.print(_json.dumps(items, indent=2))
         return
 
@@ -138,6 +140,7 @@ def prs_list(
 
 
 # ── view ───────────────────────────────────────────────────────────────────
+
 
 @prs.command("view")
 @click.argument("repo")
@@ -242,11 +245,14 @@ def prs_view(repo: str, number: int, diff: bool) -> None:
 
 # ── create ─────────────────────────────────────────────────────────────────
 
+
 @prs.command("create")
 @click.argument("repo")
 @click.option("--title", "-t", required=True, help="PR title.")
 @click.option("--body", "-b", default="", help="PR description (Markdown).")
-@click.option("--head", "-H", required=True, help="Head branch (source). Format: branch or user:branch.")
+@click.option(
+    "--head", "-H", required=True, help="Head branch (source). Format: branch or user:branch."
+)
 @click.option("--base", "-B", default="main", show_default=True, help="Base branch (target).")
 @click.option("--draft/--no-draft", default=False, show_default=True, help="Open as draft PR.")
 @click.option("--label", "-l", multiple=True, help="Label(s) to apply.")
@@ -305,6 +311,7 @@ def prs_create(
 
 # ── merge ──────────────────────────────────────────────────────────────────
 
+
 @prs.command("merge")
 @click.argument("repo")
 @click.argument("number", type=int)
@@ -336,6 +343,7 @@ def prs_merge(repo: str, number: int, method: str, message: str | None) -> None:
 
 
 # ── close ──────────────────────────────────────────────────────────────────
+
 
 @prs.command("close")
 @click.argument("repo")

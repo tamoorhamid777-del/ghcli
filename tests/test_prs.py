@@ -1,4 +1,5 @@
 """Tests for ghcli prs commands (list, view, create, merge, close)."""
+
 from __future__ import annotations
 
 import json
@@ -117,6 +118,7 @@ class TestPrsList:
 
     def test_list_api_error(self, runner, mock_client):
         from ghcli.client import GitHubAPIError
+
         mock_client.require_auth.return_value = None
         mock_client.paginate.side_effect = GitHubAPIError("Not Found", 404)
         result = runner.invoke(prs, ["list", "owner/repo"])
@@ -149,6 +151,7 @@ class TestPrsView:
 
     def test_view_api_error(self, runner, mock_client):
         from ghcli.client import GitHubAPIError
+
         mock_client.require_auth.return_value = None
         mock_client.get.side_effect = GitHubAPIError("Not Found", 404)
         result = runner.invoke(prs, ["view", "owner/repo", "999"])
@@ -174,10 +177,14 @@ class TestPrsCreate:
         result = runner.invoke(
             prs,
             [
-                "create", "owner/repo",
-                "--title", "feat: new PR",
-                "--head", "feature-branch",
-                "--base", "main",
+                "create",
+                "owner/repo",
+                "--title",
+                "feat: new PR",
+                "--head",
+                "feature-branch",
+                "--base",
+                "main",
             ],
         )
         assert result.exit_code == 0
@@ -197,10 +204,14 @@ class TestPrsCreate:
         result = runner.invoke(
             prs,
             [
-                "create", "owner/repo",
-                "--title", "WIP: draft PR",
-                "--head", "wip-branch",
-                "--base", "main",
+                "create",
+                "owner/repo",
+                "--title",
+                "WIP: draft PR",
+                "--head",
+                "wip-branch",
+                "--base",
+                "main",
                 "--draft",
             ],
         )
@@ -208,15 +219,20 @@ class TestPrsCreate:
 
     def test_create_api_error(self, runner, mock_client):
         from ghcli.client import GitHubAPIError
+
         mock_client.require_auth.return_value = None
         mock_client.post.side_effect = GitHubAPIError("Unprocessable Entity", 422)
         result = runner.invoke(
             prs,
             [
-                "create", "owner/repo",
-                "--title", "bad PR",
-                "--head", "nonexistent",
-                "--base", "main",
+                "create",
+                "owner/repo",
+                "--title",
+                "bad PR",
+                "--head",
+                "nonexistent",
+                "--base",
+                "main",
             ],
         )
         assert result.exit_code == 1 or "422" in result.output or "Error" in result.output
@@ -262,6 +278,7 @@ class TestPrsMerge:
 
     def test_merge_api_error(self, runner, mock_client):
         from ghcli.client import GitHubAPIError
+
         mock_client.require_auth.return_value = None
         mock_client.put.side_effect = GitHubAPIError("Method Not Allowed", 405)
         result = runner.invoke(prs, ["merge", "owner/repo", "1"])

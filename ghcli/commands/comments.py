@@ -41,7 +41,8 @@ def comments() -> None:
 @click.argument("repo")
 @click.argument("number", type=int)
 @click.option(
-    "--body", "-b",
+    "--body",
+    "-b",
     default=None,
     help="Comment body (Markdown). Opens $EDITOR if omitted.",
 )
@@ -57,8 +58,7 @@ def comments_create(repo: str, number: int, body: str | None, as_json: bool) -> 
     if not body:
         body = click.edit("<!-- Enter your comment above this line -->\n") or ""
         body = "\n".join(
-            line for line in body.splitlines()
-            if not line.strip().startswith("<!--")
+            line for line in body.splitlines() if not line.strip().startswith("<!--")
         ).strip()
         if not body:
             console.print("[yellow]Aborted — empty comment.[/yellow]")
@@ -128,8 +128,7 @@ def comments_list(repo: str, number: int, limit: int, as_json: bool) -> None:
         return
 
     console.print(
-        f"\n[bold]Comments on[/bold] [cyan]{repo}#{number}[/cyan]  "
-        f"({len(items)} shown)\n"
+        f"\n[bold]Comments on[/bold] [cyan]{repo}#{number}[/cyan]  " f"({len(items)} shown)\n"
     )
     for comment in items:
         author = comment.get("user", {}).get("login", "unknown")

@@ -99,6 +99,7 @@ def files() -> None:
 
 # ── list ───────────────────────────────────────────────────────────────────
 
+
 @files.command("list")
 @click.argument("repo")
 @click.option("--path", "-p", default="", help="Directory path within the repo (default: root).")
@@ -130,6 +131,7 @@ def files_list(repo: str, path: str, branch: str | None, output_json: bool) -> N
 
     if output_json:
         import json as _json
+
         console.print(_json.dumps(items, indent=2))
         return
 
@@ -163,6 +165,7 @@ def files_list(repo: str, path: str, branch: str | None, output_json: bool) -> N
 
 
 # ── view ───────────────────────────────────────────────────────────────────
+
 
 @files.command("view")
 @click.argument("repo")
@@ -227,13 +230,16 @@ def files_view(
 
 # ── write (create / update) ────────────────────────────────────────────────
 
+
 @files.command("write")
 @click.argument("repo")
 @click.argument("path")
 @click.option("--message", "-m", required=True, help="Commit message.")
 @click.option("--content", "-c", default=None, help="File content as a string.")
 @click.option(
-    "--file", "-f", "local_file",
+    "--file",
+    "-f",
+    "local_file",
     default=None,
     type=click.Path(exists=True),
     help="Read content from a local file.",
@@ -311,6 +317,7 @@ def files_write(
 
 # ── delete ─────────────────────────────────────────────────────────────────
 
+
 @files.command("delete")
 @click.argument("repo")
 @click.argument("path")
@@ -357,6 +364,7 @@ def files_delete(
 
 
 # ── tree ───────────────────────────────────────────────────────────────────
+
 
 @files.command("tree")
 @click.argument("repo")

@@ -1,10 +1,22 @@
 """Tests for ghcli notifications commands."""
+
 from __future__ import annotations
+
 from unittest.mock import MagicMock, patch
+
 from click.testing import CliRunner
+
 from ghcli.commands.notifications import notifications
 
-MOCK_NOTIFS = [{"id": "1", "repository": {"full_name": "owner/repo"}, "subject": {"type": "Issue", "title": "Bug found"}, "updated_at": "2026-01-01T00:00:00Z"}]
+MOCK_NOTIFS = [
+    {
+        "id": "1",
+        "repository": {"full_name": "owner/repo"},
+        "subject": {"type": "Issue", "title": "Bug found"},
+        "updated_at": "2026-01-01T00:00:00Z",
+    }
+]
+
 
 def make_client(get_val=None):
     client = MagicMock()
@@ -12,6 +24,7 @@ def make_client(get_val=None):
     client.patch.return_value = None
     client.put.return_value = None
     return client
+
 
 def test_notifications_list():
     runner = CliRunner()
@@ -21,6 +34,7 @@ def test_notifications_list():
     assert result.exit_code == 0
     assert "Bug found" in result.output
 
+
 def test_notifications_list_empty():
     runner = CliRunner()
     with patch("ghcli.commands.notifications.GitHubClient") as MockClient:
@@ -29,6 +43,7 @@ def test_notifications_list_empty():
     assert result.exit_code == 0
     assert "No unread" in result.output
 
+
 def test_notifications_read():
     runner = CliRunner()
     with patch("ghcli.commands.notifications.GitHubClient") as MockClient:
@@ -36,6 +51,7 @@ def test_notifications_read():
         result = runner.invoke(notifications, ["read", "123"])
     assert result.exit_code == 0
     assert "marked as read" in result.output
+
 
 def test_notifications_read_all():
     runner = CliRunner()

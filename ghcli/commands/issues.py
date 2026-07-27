@@ -44,6 +44,7 @@ def issues() -> None:
 
 # ── list ───────────────────────────────────────────────────────────────────
 
+
 @issues.command("list")
 @click.argument("repo")
 @click.option(
@@ -93,6 +94,7 @@ def issues_list(
 
     if output_json:
         import json as _json
+
         console.print(_json.dumps(items, indent=2))
         return
 
@@ -127,6 +129,7 @@ def issues_list(
 
 
 # ── view ───────────────────────────────────────────────────────────────────
+
 
 @issues.command("view")
 @click.argument("repo")
@@ -185,6 +188,7 @@ def issues_view(repo: str, number: int) -> None:
 
 # ── create ─────────────────────────────────────────────────────────────────
 
+
 @issues.command("create")
 @click.argument("repo")
 @click.option("--title", "-t", required=True, help="Issue title.")
@@ -231,6 +235,7 @@ def issues_create(
 
 # ── close ──────────────────────────────────────────────────────────────────
 
+
 @issues.command("close")
 @click.argument("repo")
 @click.argument("number", type=int)
@@ -253,6 +258,7 @@ def issues_close(repo: str, number: int, comment: str | None) -> None:
 
 # ── reopen ─────────────────────────────────────────────────────────────────
 
+
 @issues.command("reopen")
 @click.argument("repo")
 @click.argument("number", type=int)
@@ -268,6 +274,7 @@ def issues_reopen(repo: str, number: int) -> None:
 
 
 # ── comment ────────────────────────────────────────────────────────────────
+
 
 @issues.command("comment")
 @click.argument("repo")

@@ -1,15 +1,17 @@
 """Status command — show auth status, current user, and API rate limits."""
+
 from __future__ import annotations
 
 import json
-import click
-from rich.console import Console
-from rich.table import Table
-from rich.panel import Panel
-from rich import box
 
-from ghcli.client import GitHubClient
+import click
+from rich import box
+from rich.console import Console
+from rich.panel import Panel
+from rich.table import Table
+
 from ghcli.auth_store import load_token
+from ghcli.client import GitHubClient
 
 console = Console()
 
@@ -23,7 +25,12 @@ def status(as_json: bool) -> None:
         if as_json:
             click.echo(json.dumps({"authenticated": False}))
         else:
-            console.print(Panel("[red]✗ Not authenticated[/red]\nRun [cyan]ghcli auth setup[/cyan] to get started.", title="ghcli status"))
+            console.print(
+                Panel(
+                    "[red]✗ Not authenticated[/red]\nRun [cyan]ghcli auth setup[/cyan] to get started.",
+                    title="ghcli status",
+                )
+            )
         return
 
     client = GitHubClient(token)
@@ -45,16 +52,18 @@ def status(as_json: bool) -> None:
         return
 
     # User panel
-    console.print(Panel(
-        f"[bold green]✓ Authenticated[/bold green]\n"
-        f"  Login:    [cyan]{user.get('login')}[/cyan]\n"
-        f"  Name:     {user.get('name') or '(not set)'}\n"
-        f"  Email:    {user.get('email') or '(private)'}\n"
-        f"  Plan:     {user.get('plan', {}).get('name', 'unknown') if user.get('plan') else 'unknown'}\n"
-        f"  Profile:  {user.get('html_url')}",
-        title="ghcli status",
-        border_style="green",
-    ))
+    console.print(
+        Panel(
+            f"[bold green]✓ Authenticated[/bold green]\n"
+            f"  Login:    [cyan]{user.get('login')}[/cyan]\n"
+            f"  Name:     {user.get('name') or '(not set)'}\n"
+            f"  Email:    {user.get('email') or '(private)'}\n"
+            f"  Plan:     {user.get('plan', {}).get('name', 'unknown') if user.get('plan') else 'unknown'}\n"
+            f"  Profile:  {user.get('html_url')}",
+            title="ghcli status",
+            border_style="green",
+        )
+    )
 
     # Rate limit table
     resources = rate.get("resources", {})
@@ -66,10 +75,13 @@ def status(as_json: bool) -> None:
         table.add_column("Remaining", justify="right")
         table.add_column("Resets At")
         import datetime
+
         for name, info in resources.items():
             used = info.get("limit", 0) - info.get("remaining", 0)
             reset_ts = info.get("reset", 0)
-            reset_str = datetime.datetime.fromtimestamp(reset_ts).strftime("%H:%M:%S") if reset_ts else ""
+            reset_str = (
+                datetime.datetime.fromtimestamp(reset_ts).strftime("%H:%M:%S") if reset_ts else ""
+            )
             remaining = info.get("remaining", 0)
             color = "green" if remaining > 100 else "yellow" if remaining > 10 else "red"
             table.add_row(

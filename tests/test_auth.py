@@ -2,9 +2,10 @@
 Tests for ghcli auth commands.
 """
 
+from unittest.mock import MagicMock, patch
+
 import pytest
 from click.testing import CliRunner
-from unittest.mock import patch, MagicMock
 
 from ghcli.main import cli
 
@@ -14,8 +15,12 @@ class TestAuthSetup:
 
     def test_setup_with_valid_token(self, cli_runner):
         """Test successful token setup with a valid token."""
-        mock_user = {"login": "testuser", "name": "Test User", "email": "test@example.com",
-                     "public_repos": 5}
+        mock_user = {
+            "login": "testuser",
+            "name": "Test User",
+            "email": "test@example.com",
+            "public_repos": 5,
+        }
 
         with patch("ghcli.commands.auth.GitHubClient") as mock_client_cls:
             mock_client = MagicMock()

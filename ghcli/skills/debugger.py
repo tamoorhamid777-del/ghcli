@@ -56,15 +56,15 @@ import enum
 import json
 import time
 import uuid
-from dataclasses import dataclass, field, asdict
+from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Dict, List, Optional
 
+from rich import box
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
-from rich import box
 
 console = Console()
 
@@ -79,9 +79,7 @@ def _session_path(session_id: str) -> Path:
 
 def _save_session(session: "DebugSession") -> None:
     DEBUG_DIR.mkdir(parents=True, exist_ok=True)
-    _session_path(session.session_id).write_text(
-        json.dumps(session.to_dict(), indent=2)
-    )
+    _session_path(session.session_id).write_text(json.dumps(session.to_dict(), indent=2))
 
 
 def _load_session(session_id: str) -> "DebugSession":
@@ -107,38 +105,39 @@ def _list_sessions() -> List[dict]:
 
 # ── Enums & data classes ──────────────────────────────────────────────────────
 
+
 class DebugPhase(str, enum.Enum):
-    REPRODUCE   = "reproduce"
-    ISOLATE     = "isolate"
+    REPRODUCE = "reproduce"
+    ISOLATE = "isolate"
     HYPOTHESIZE = "hypothesize"
-    VERIFY      = "verify"
-    FIX         = "fix"
-    DOCUMENT    = "document"
-    CLOSED      = "closed"
+    VERIFY = "verify"
+    FIX = "fix"
+    DOCUMENT = "document"
+    CLOSED = "closed"
 
     @property
     def label(self) -> str:
         labels = {
-            "reproduce":   "1 · Reproduce",
-            "isolate":     "2 · Isolate",
+            "reproduce": "1 · Reproduce",
+            "isolate": "2 · Isolate",
             "hypothesize": "3 · Hypothesize",
-            "verify":      "4 · Verify",
-            "fix":         "5 · Fix",
-            "document":    "6 · Document",
-            "closed":      "✓ Closed",
+            "verify": "4 · Verify",
+            "fix": "5 · Fix",
+            "document": "6 · Document",
+            "closed": "✓ Closed",
         }
         return labels[self.value]
 
     @property
     def color(self) -> str:
         colors = {
-            "reproduce":   "yellow",
-            "isolate":     "cyan",
+            "reproduce": "yellow",
+            "isolate": "cyan",
             "hypothesize": "magenta",
-            "verify":      "blue",
-            "fix":         "green",
-            "document":    "white",
-            "closed":      "dim",
+            "verify": "blue",
+            "fix": "green",
+            "document": "white",
+            "closed": "dim",
         }
         return colors[self.value]
 
@@ -162,8 +161,8 @@ class Finding:
 class Hypothesis:
     id: str
     description: str
-    confidence: float = 0.5   # 0.0 – 1.0
-    status: str = "pending"   # pending | confirmed | rejected
+    confidence: float = 0.5  # 0.0 – 1.0
+    status: str = "pending"  # pending | confirmed | rejected
     evidence: str = ""
     timestamp: float = field(default_factory=time.time)
 
@@ -182,9 +181,9 @@ class Hypothesis:
     @property
     def status_badge(self) -> Text:
         mapping = {
-            "pending":   Text("⏳ pending",   style="yellow"),
+            "pending": Text("⏳ pending", style="yellow"),
             "confirmed": Text("✓ confirmed", style="bold green"),
-            "rejected":  Text("✗ rejected",  style="bold red"),
+            "rejected": Text("✗ rejected", style="bold red"),
         }
         return mapping.get(self.status, Text(self.status))
 
@@ -218,6 +217,7 @@ class DebugReport:
 
 
 # ── Debug session ─────────────────────────────────────────────────────────────
+
 
 class DebugSession:
     """
@@ -253,25 +253,31 @@ class DebugSession:
         """Record reproduction steps. Advances to ISOLATE."""
         self.findings.append(Finding(DebugPhase.REPRODUCE.value, description, evidence=evidence))
         self._advance_phase(DebugPhase.ISOLATE)
-        console.print(f"[yellow]✓ Reproduce recorded.[/yellow] Phase → [cyan]{DebugPhase.ISOLATE.label}[/cyan]")
+        console.print(
+            f"[yellow]✓ Reproduce recorded.[/yellow] Phase → [cyan]{DebugPhase.ISOLATE.label}[/cyan]"
+        )
         return self
 
     def isolate(self, description: str, evidence: str = "") -> "DebugSession":
         """Record isolation findings. Advances to HYPOTHESIZE."""
         self.findings.append(Finding(DebugPhase.ISOLATE.value, description, evidence=evidence))
         self._advance_phase(DebugPhase.HYPOTHESIZE)
-        console.print(f"[cyan]✓ Isolation recorded.[/cyan] Phase → [magenta]{DebugPhase.HYPOTHESIZE.label}[/magenta]")
+        console.print(
+            f"[cyan]✓ Isolation recorded.[/cyan] Phase → [magenta]{DebugPhase.HYPOTHESIZE.label}[/magenta]"
+        )
         return self
 
     def hypothesize(self, description: str, confidence: float = 0.5) -> str:
         """Add a hypothesis. Returns its ID (H1, H2, …)."""
         self._hyp_counter += 1
         hyp_id = f"H{self._hyp_counter}"
-        self.hypotheses.append(Hypothesis(
-            id=hyp_id,
-            description=description,
-            confidence=max(0.0, min(1.0, confidence)),
-        ))
+        self.hypotheses.append(
+            Hypothesis(
+                id=hyp_id,
+                description=description,
+                confidence=max(0.0, min(1.0, confidence)),
+            )
+        )
         _save_session(self)
         console.print(
             f"[magenta]✓ Hypothesis {hyp_id} added[/magenta] "
@@ -289,11 +295,13 @@ class DebugSession:
             raise KeyError(f"Hypothesis '{hyp_id}' not found.")
         hyp.status = "confirmed" if passed else "rejected"
         hyp.evidence = evidence
-        self.findings.append(Finding(
-            DebugPhase.VERIFY.value,
-            f"{hyp_id} {'confirmed' if passed else 'rejected'}: {hyp.description}",
-            evidence=evidence,
-        ))
+        self.findings.append(
+            Finding(
+                DebugPhase.VERIFY.value,
+                f"{hyp_id} {'confirmed' if passed else 'rejected'}: {hyp.description}",
+                evidence=evidence,
+            )
+        )
         if passed:
             self.root_cause = hyp.description
             self._advance_phase(DebugPhase.FIX)
@@ -312,7 +320,9 @@ class DebugSession:
         self.regression_test = test
         self.findings.append(Finding(DebugPhase.FIX.value, description, evidence=test))
         self._advance_phase(DebugPhase.DOCUMENT)
-        console.print(f"[green]✓ Fix recorded.[/green] Phase → [white]{DebugPhase.DOCUMENT.label}[/white]")
+        console.print(
+            f"[green]✓ Fix recorded.[/green] Phase → [white]{DebugPhase.DOCUMENT.label}[/white]"
+        )
         return self
 
     def close(self) -> DebugReport:
@@ -366,21 +376,24 @@ class DebugSession:
 
 # ── High-level façade ─────────────────────────────────────────────────────────
 
+
 class Debugger:
     """High-level debugging façade."""
 
     def new_session(self, title: str) -> DebugSession:
         sess = DebugSession(title=title)
         _save_session(sess)
-        console.print(Panel(
-            f"[bold]Session ID:[/bold] [cyan]{sess.session_id}[/cyan]\n"
-            f"[bold]Title:[/bold]      {title}\n"
-            f"[bold]Phase:[/bold]      [{DebugPhase.REPRODUCE.color}]{DebugPhase.REPRODUCE.label}[/{DebugPhase.REPRODUCE.color}]\n\n"
-            "[dim]Next step: record reproduction steps with[/dim]\n"
-            f"  [bold]ghcli skills debug reproduce {sess.session_id} \"<steps>\"[/bold]",
-            title="[bold cyan]🐛 New Debug Session[/bold cyan]",
-            border_style="cyan",
-        ))
+        console.print(
+            Panel(
+                f"[bold]Session ID:[/bold] [cyan]{sess.session_id}[/cyan]\n"
+                f"[bold]Title:[/bold]      {title}\n"
+                f"[bold]Phase:[/bold]      [{DebugPhase.REPRODUCE.color}]{DebugPhase.REPRODUCE.label}[/{DebugPhase.REPRODUCE.color}]\n\n"
+                "[dim]Next step: record reproduction steps with[/dim]\n"
+                f'  [bold]ghcli skills debug reproduce {sess.session_id} "<steps>"[/bold]',
+                title="[bold cyan]🐛 New Debug Session[/bold cyan]",
+                border_style="cyan",
+            )
+        )
         return sess
 
     def load(self, session_id: str) -> DebugSession:
@@ -397,14 +410,23 @@ class Debugger:
         table.add_row("Root cause", sess.root_cause or "—")
         table.add_row("Fix applied", sess.fix_applied or "—")
         table.add_row("Regression test", sess.regression_test or "—")
-        console.print(Panel(table, title=f"[bold cyan]Debug Session {sess.session_id}[/bold cyan]", border_style="cyan"))
+        console.print(
+            Panel(
+                table,
+                title=f"[bold cyan]Debug Session {sess.session_id}[/bold cyan]",
+                border_style="cyan",
+            )
+        )
 
         if sess.findings:
             ftable = Table(title="Findings", box=box.SIMPLE, header_style="bold cyan")
             ftable.add_column("Phase", width=16)
             ftable.add_column("Description")
             for f in sess.findings:
-                ftable.add_row(f"[{DebugPhase(f.phase).color}]{DebugPhase(f.phase).label}[/{DebugPhase(f.phase).color}]", f.description)
+                ftable.add_row(
+                    f"[{DebugPhase(f.phase).color}]{DebugPhase(f.phase).label}[/{DebugPhase(f.phase).color}]",
+                    f.description,
+                )
             console.print(ftable)
 
         if sess.hypotheses:
@@ -427,14 +449,22 @@ class Debugger:
             f"[bold]Findings:[/bold]        {len(report.findings)}\n"
             f"[bold]Hypotheses:[/bold]      {len(report.hypotheses)}"
         )
-        console.print(Panel(content, title=f"[bold green]✓ Debug Report — {report.title}[/bold green]", border_style="green"))
+        console.print(
+            Panel(
+                content,
+                title=f"[bold green]✓ Debug Report — {report.title}[/bold green]",
+                border_style="green",
+            )
+        )
 
     def list_sessions(self) -> None:
         sessions = _list_sessions()
         if not sessions:
             console.print("[yellow]No debug sessions found.[/yellow]")
             return
-        table = Table(title="Debug Sessions", box=box.ROUNDED, border_style="cyan", header_style="bold cyan")
+        table = Table(
+            title="Debug Sessions", box=box.ROUNDED, border_style="cyan", header_style="bold cyan"
+        )
         table.add_column("ID", width=10)
         table.add_column("Title", min_width=30)
         table.add_column("Phase", width=18)

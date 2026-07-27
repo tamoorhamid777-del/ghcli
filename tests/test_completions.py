@@ -1,4 +1,5 @@
 """Tests for ghcli completions command."""
+
 from __future__ import annotations
 
 from unittest.mock import patch
@@ -34,17 +35,23 @@ class TestCompletionsHelp:
 
 class TestCompletionsGenerate:
     def test_generate_bash(self, runner):
-        with patch("ghcli.commands.completions._generate_completion", return_value="# bash completion\n"):
+        with patch(
+            "ghcli.commands.completions._generate_completion", return_value="# bash completion\n"
+        ):
             result = runner.invoke(completions, ["generate", "bash"])
         assert result.exit_code == 0
 
     def test_generate_zsh(self, runner):
-        with patch("ghcli.commands.completions._generate_completion", return_value="# zsh completion\n"):
+        with patch(
+            "ghcli.commands.completions._generate_completion", return_value="# zsh completion\n"
+        ):
             result = runner.invoke(completions, ["generate", "zsh"])
         assert result.exit_code == 0
 
     def test_generate_fish(self, runner):
-        with patch("ghcli.commands.completions._generate_completion", return_value="# fish completion\n"):
+        with patch(
+            "ghcli.commands.completions._generate_completion", return_value="# fish completion\n"
+        ):
             result = runner.invoke(completions, ["generate", "fish"])
         assert result.exit_code == 0
 
