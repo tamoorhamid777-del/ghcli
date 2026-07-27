@@ -1,0 +1,13 @@
+# ghcli runtime dependencies
+# Install with: pip install -r requirements.txt
+
+click>=8.1.7
+requests>=2.31.0
+rich>=13.7.0
+keyring>=24.3.0
+
+# Optional: needed only for `ghcli repos clone` (delegates to git subprocess)
+# git must be installed separately on the system
+
+# Development / testing extras (not required for runtime)
+# Install with: pip install -r requirements-dev.txt
