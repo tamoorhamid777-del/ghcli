@@ -207,8 +207,8 @@ def repos_create(
         Panel(
             f"[bold green]✓ Repository created![/bold green]\n\n"
             f"  [bold]{repo['full_name']}[/bold]  [{vis}]\n\n"
-            f"  Clone (HTTPS): [cyan]{repo['clone_url']}[/cyan]\n"
-            f"  Clone (SSH):   [cyan]{repo['ssh_url']}[/cyan]\n\n"
+            f"  Clone (HTTPS): [cyan]{repo.get('clone_url', '')}[/cyan]\n"
+            f"  Clone (SSH):   [cyan]{repo.get('ssh_url', '')}[/cyan]\n\n"
             f"  [dim]ghcli repos clone {repo['full_name']}[/dim]",
             title="[bold cyan]New Repository[/bold cyan]",
             border_style="green",

@@ -25,7 +25,9 @@ jobs:
           cache: pip
 
       - name: Install dev dependencies
-        run: pip install -e ".[dev]"
+        run: |
+          pip install --upgrade pip setuptools wheel
+          pip install -e ".[dev]"
 
       - name: Check formatting (black)
         run: black --check ghcli tests --line-length=100
@@ -59,7 +61,9 @@ jobs:
           cache: pip
 
       - name: Install dependencies
-        run: pip install -e ".[dev]"
+        run: |
+          pip install --upgrade pip setuptools wheel
+          pip install -e ".[dev]"
 
       - name: Run tests
         run: pytest tests -v --tb=short --cov=ghcli --cov-report=xml
@@ -85,7 +89,9 @@ jobs:
           cache: pip
 
       - name: Install dev dependencies
-        run: pip install -e ".[dev]"
+        run: |
+          pip install --upgrade pip setuptools wheel
+          pip install -e ".[dev]"
 
       - name: Run bandit
         run: bandit -r ghcli -ll
@@ -108,7 +114,9 @@ jobs:
           cache: pip
 
       - name: Install build tools
-        run: pip install build twine
+        run: |
+          pip install --upgrade pip setuptools wheel
+          pip install build twine
 
       - name: Build sdist and wheel
         run: python -m build

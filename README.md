@@ -2,7 +2,7 @@
 
 > Manage GitHub repositories, issues, pull requests, commits, and files directly from your terminal.
 
-[![CI](https://github.com/your-org/ghcli/actions/workflows/ci.yml/badge.svg)](https://github.com/your-org/ghcli/actions/workflows/ci.yml)
+[![CI](https://github.com/tamoorhamid777-del/ghcli/actions/workflows/ci.yml/badge.svg)](https://github.com/tamoorhamid777-del/ghcli/actions/workflows/ci.yml)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
@@ -69,7 +69,7 @@
 ### From source (recommended for development)
 
 ```bash
-git clone https://github.com/your-org/ghcli.git
+git clone https://github.com/tamoorhamid777-del/ghcli.git
 cd ghcli
 pip install -e .
 ```
@@ -478,7 +478,7 @@ ghcli repos list
 
 ```bash
 # Clone and set up
-git clone https://github.com/your-org/ghcli.git
+git clone https://github.com/tamoorhamid777-del/ghcli.git
 cd ghcli
 python3 -m venv .venv && source .venv/bin/activate
 make install-dev

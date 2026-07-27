@@ -10,7 +10,7 @@ from __future__ import annotations
 import click
 from rich.console import Console
 
-from ghcli.__init__ import __version__
+from ghcli import __version__
 from ghcli.commands.auth import auth
 from ghcli.commands.repos import repos
 from ghcli.commands.issues import issues
