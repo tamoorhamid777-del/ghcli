@@ -41,6 +41,7 @@ def commits() -> None:
 @click.option("--since", "-s", default=None, help="ISO 8601 date (e.g. 2024-01-01).")
 @click.option("--until", "-u", default=None, help="ISO 8601 date (e.g. 2024-12-31).")
 @click.option("--limit", "-n", default=20, show_default=True, help="Max commits to show.")
+@click.option("--json", "output_json", is_flag=True, default=False, help="Output raw JSON.")
 def commits_list(
     repo: str,
     branch: str | None,
@@ -49,6 +50,7 @@ def commits_list(
     since: str | None,
     until: str | None,
     limit: int,
+    output_json: bool,
 ) -> None:
     """List recent commits for OWNER/REPO."""
     c = _client()
@@ -72,6 +74,11 @@ def commits_list(
 
     if not items:
         console.print(f"[yellow]No commits found for {repo}.[/yellow]")
+        return
+
+    if output_json:
+        import json as _json
+        console.print(_json.dumps(items, indent=2))
         return
 
     table = Table(

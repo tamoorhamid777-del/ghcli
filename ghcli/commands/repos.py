@@ -64,7 +64,8 @@ def repos() -> None:
     show_default=True,
 )
 @click.option("--limit", "-n", default=30, show_default=True, help="Max repos to show.")
-def repos_list(user: str | None, org: str | None, repo_type: str, sort: str, limit: int) -> None:
+@click.option("--json", "output_json", is_flag=True, default=False, help="Output raw JSON.")
+def repos_list(user: str | None, org: str | None, repo_type: str, sort: str, limit: int, output_json: bool) -> None:
     """List repositories for the authenticated user, a specific user, or an org."""
     c = _client()
     try:
@@ -85,6 +86,11 @@ def repos_list(user: str | None, org: str | None, repo_type: str, sort: str, lim
 
     if not items:
         console.print("[yellow]No repositories found.[/yellow]")
+        return
+
+    if output_json:
+        import json as _json
+        console.print(_json.dumps(items, indent=2))
         return
 
     table = Table(

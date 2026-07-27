@@ -103,7 +103,8 @@ def files() -> None:
 @click.argument("repo")
 @click.option("--path", "-p", default="", help="Directory path within the repo (default: root).")
 @click.option("--branch", "-b", default=None, help="Branch/tag/SHA (default: repo default).")
-def files_list(repo: str, path: str, branch: str | None) -> None:
+@click.option("--json", "output_json", is_flag=True, default=False, help="Output raw JSON.")
+def files_list(repo: str, path: str, branch: str | None, output_json: bool) -> None:
     """List files and directories at PATH in OWNER/REPO."""
     c = _client()
     params: dict = {}
@@ -127,6 +128,11 @@ def files_list(repo: str, path: str, branch: str | None) -> None:
     dirs = sorted([i for i in items if i["type"] == "dir"], key=lambda x: x["name"])
     file_list = sorted([i for i in items if i["type"] == "file"], key=lambda x: x["name"])
 
+    if output_json:
+        import json as _json
+        console.print(_json.dumps(items, indent=2))
+        return
+
     table = Table(
         title=f"{repo}/{path or '(root)'}",
         box=box.ROUNDED,
@@ -141,7 +147,7 @@ def files_list(repo: str, path: str, branch: str | None) -> None:
 
     for item in dirs:
         table.add_row(
-            "[bold blue]📁 dir[/bold blue]",
+            "[bold blue]dir[/bold blue]",
             f"[bold blue]{item['name']}/[/bold blue]",
             "—",
             item["sha"][:7],
@@ -150,7 +156,7 @@ def files_list(repo: str, path: str, branch: str | None) -> None:
     for item in file_list:
         size = item.get("size", 0) or 0
         size_str = f"{size:,} B" if size < 1024 else f"{size / 1024:.1f} KB"
-        table.add_row("📄 file", item["name"], size_str, item["sha"][:7])
+        table.add_row("file", item["name"], size_str, item["sha"][:7])
 
     console.print(table)
     console.print(f"[dim]{len(dirs)} directories, {len(file_list)} files[/dim]")

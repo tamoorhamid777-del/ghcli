@@ -61,6 +61,7 @@ def issues() -> None:
     type=click.Choice(["created", "updated", "comments"]),
     show_default=True,
 )
+@click.option("--json", "output_json", is_flag=True, default=False, help="Output raw JSON.")
 def issues_list(
     repo: str,
     state: str,
@@ -68,6 +69,7 @@ def issues_list(
     assignee: str | None,
     limit: int,
     sort: str,
+    output_json: bool,
 ) -> None:
     """List issues for OWNER/REPO."""
     c = _client()
@@ -87,6 +89,11 @@ def issues_list(
 
     if not items:
         console.print(f"[yellow]No {state} issues found in {repo}.[/yellow]")
+        return
+
+    if output_json:
+        import json as _json
+        console.print(_json.dumps(items, indent=2))
         return
 
     table = Table(

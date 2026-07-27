@@ -73,6 +73,7 @@ def prs() -> None:
     show_default=True,
 )
 @click.option("--limit", "-n", default=20, show_default=True)
+@click.option("--json", "output_json", is_flag=True, default=False, help="Output raw JSON.")
 def prs_list(
     repo: str,
     state: str,
@@ -80,6 +81,7 @@ def prs_list(
     head: str | None,
     sort: str,
     limit: int,
+    output_json: bool,
 ) -> None:
     """List pull requests for OWNER/REPO."""
     c = _client()
@@ -97,6 +99,11 @@ def prs_list(
 
     if not items:
         console.print(f"[yellow]No {state} pull requests found in {repo}.[/yellow]")
+        return
+
+    if output_json:
+        import json as _json
+        console.print(_json.dumps(items, indent=2))
         return
 
     table = Table(
