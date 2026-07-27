@@ -57,7 +57,7 @@
 | ⭐ Stars | `star add`, `star remove`, `star list`, `star check` |
 | 📊 Status | `status` — auth + rate limit dashboard |
 
-**v1.2.0 highlights:**
+**v1.2.1 highlights:**
 - `ghcli comments` — full comment management on issues & PRs
 - `ghcli repos create/delete/fork/clone` — complete repo lifecycle
 - `ghcli issues create/close/reopen/comment` — full issue workflow
