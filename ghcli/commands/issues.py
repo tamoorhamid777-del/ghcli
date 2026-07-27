@@ -89,6 +89,11 @@ def issues_list(
         raise SystemExit(1)
 
     if not items:
+        if output_json:
+            import json as _json
+
+            console.print(_json.dumps([], indent=2))
+            return
         console.print(f"[yellow]No {state} issues found in {repo}.[/yellow]")
         return
 

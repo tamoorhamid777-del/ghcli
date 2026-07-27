@@ -74,6 +74,11 @@ def commits_list(
         raise SystemExit(1)
 
     if not items:
+        if output_json:
+            import json as _json
+
+            console.print(_json.dumps([], indent=2))
+            return
         console.print(f"[yellow]No commits found for {repo}.[/yellow]")
         return
 

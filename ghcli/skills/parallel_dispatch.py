@@ -360,7 +360,7 @@ class AsyncWorkerPool:
             assert task.fn is not None
             with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
                 output = await asyncio.wait_for(
-                    loop.run_in_executor(executor, lambda: task.fn(task)),
+                    loop.run_in_executor(executor, lambda: task.fn(task)),  # type: ignore[misc]
                     timeout=task.timeout,
                 )
             return TaskResult(

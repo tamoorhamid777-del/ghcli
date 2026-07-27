@@ -194,7 +194,7 @@ class WebSearchAdapter(SourceAdapter):
     def _serpapi(self, query: str, limit: int, key: str) -> List[Dict[str, Any]]:
         url = "https://serpapi.com/search"
         params = {"q": query, "api_key": key, "num": limit, "engine": "google"}
-        resp = requests.get(url, params=params, headers=DEFAULT_HEADERS, timeout=DEFAULT_TIMEOUT)
+        resp = requests.get(url, params=params, headers=DEFAULT_HEADERS, timeout=DEFAULT_TIMEOUT)  # type: ignore[arg-type]
         resp.raise_for_status()
         data = resp.json()
         return [
@@ -211,7 +211,7 @@ class WebSearchAdapter(SourceAdapter):
         url = "https://api.search.brave.com/res/v1/web/search"
         headers = {**DEFAULT_HEADERS, "Accept": "application/json", "X-Subscription-Token": key}
         params = {"q": query, "count": limit}
-        resp = requests.get(url, params=params, headers=headers, timeout=DEFAULT_TIMEOUT)
+        resp = requests.get(url, params=params, headers=headers, timeout=DEFAULT_TIMEOUT)  # type: ignore[arg-type]
         resp.raise_for_status()
         data = resp.json()
         return [
@@ -249,7 +249,7 @@ class GitHubSearchAdapter(SourceAdapter):
         """
         url = f"https://api.github.com/search/{kind}"
         params = {"q": query, "per_page": min(limit, 30)}
-        resp = requests.get(url, params=params, headers=self._headers(), timeout=DEFAULT_TIMEOUT)
+        resp = requests.get(url, params=params, headers=self._headers(), timeout=DEFAULT_TIMEOUT)  # type: ignore[arg-type]
         resp.raise_for_status()
         data = resp.json()
         items = []
@@ -302,7 +302,7 @@ class ArxivAdapter(SourceAdapter):
             "max_results": limit,
             "sortBy": "relevance",
         }
-        resp = requests.get(url, params=params, headers=DEFAULT_HEADERS, timeout=DEFAULT_TIMEOUT)
+        resp = requests.get(url, params=params, headers=DEFAULT_HEADERS, timeout=DEFAULT_TIMEOUT)  # type: ignore[arg-type]
         resp.raise_for_status()
         ns = {"atom": "http://www.w3.org/2005/Atom"}
         root = ET.fromstring(resp.text)  # nosec B314
@@ -341,7 +341,7 @@ class WikipediaAdapter(SourceAdapter):
             "format": "json",
         }
         resp = requests.get(
-            search_url, params=params, headers=DEFAULT_HEADERS, timeout=DEFAULT_TIMEOUT
+            search_url, params=params, headers=DEFAULT_HEADERS, timeout=DEFAULT_TIMEOUT  # type: ignore[arg-type]
         )
         resp.raise_for_status()
         data = resp.json()

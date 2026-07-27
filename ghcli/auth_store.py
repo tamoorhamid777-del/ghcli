@@ -28,7 +28,7 @@ ACCOUNT_NAME = "github_token"
 def _try_keyring():
     """Return the keyring module if available and functional, else None."""
     try:
-        import keyring  # type: ignore[import]
+        import keyring
 
         # Verify keyring actually works (some headless envs raise RuntimeError)
         keyring.get_keyring()

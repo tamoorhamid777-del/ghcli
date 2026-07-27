@@ -154,7 +154,7 @@ class GitHubClient:
                     def text(self_inner):
                         return str(cached[0])
 
-                return _CachedResp()
+                return _CachedResp()  # type: ignore[return-value]
 
         # Retry with exponential backoff
         max_retries = 3

@@ -89,6 +89,11 @@ def repos_list(
         raise SystemExit(1)
 
     if not items:
+        if output_json:
+            import json as _json
+
+            console.print(_json.dumps([], indent=2))
+            return
         console.print("[yellow]No repositories found.[/yellow]")
         return
 

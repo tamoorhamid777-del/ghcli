@@ -1,5 +1,26 @@
 # Changelog
 
+## [1.2.2] — 2026-07-28
+
+### Fixed
+- **`--json` empty-list bug** — `issues list`, `prs list`, `repos list`, `commits list` now correctly
+  output `[]` (valid JSON) instead of a human-readable "No items found" message when the result set
+  is empty and `--json` is passed. This was breaking any script or pipeline that piped the output
+  through `jq` or `json.loads()`.
+- **mypy CI failures** — resolved 8 type errors that were causing the `lint` CI job to fail on every
+  push: unused `type: ignore` in `auth_store.py`, incompatible return type in `client.py`
+  (`_CachedResp`), 5 `arg-type` errors in `skills/deep_research.py`, and a `None not callable`
+  error in `skills/parallel_dispatch.py`.
+- **black/isort formatting** — re-formatted all 8 files touched by the above fixes so `black --check`
+  and `isort --check-only` pass cleanly in CI.
+
+### Verified (deployment audit)
+- Fresh clone → `pip install -e .` → `ghcli --version 1.2.2` works with zero friction
+- All 16 command groups and 54 subcommands respond correctly
+- 11/11 `--json` list commands output valid, parseable JSON
+- `pytest 223/223` passed · coverage 79% · `ast.parse 29/29` clean
+- `mypy` 0 errors · `black` clean · `isort` clean · `bandit -ll` 0 Medium/High issues
+
 ## [1.2.1] — 2026-07-27
 
 ### Added
