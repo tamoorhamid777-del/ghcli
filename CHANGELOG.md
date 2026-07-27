@@ -1,5 +1,26 @@
 # Changelog
 
+## [1.2.0] — 2026-07-27
+
+### Added
+- `ghcli comments create/list/delete` — Add and manage comments on issues and PRs
+- `ghcli repos create` — Create new repositories with `--private`, `--gitignore`, `--license`, `--org` flags
+- `ghcli repos delete` — Delete a repository with double-confirmation safety
+- `ghcli repos fork` — Fork a repository to your account or an org (`--org`)
+- `ghcli repos clone` — Clone a repo by shorthand with `--ssh` and `--depth` flags
+- `ghcli issues create` — Create issues with `--title`, `--body`, `--label`, `--assignee`, `--milestone`
+- `ghcli issues close` — Close an issue with optional `--comment`
+- `ghcli issues reopen` — Reopen a closed issue
+- `ghcli issues comment` — Add a comment to an issue
+- `ghcli prs create` — Create PRs with `--title`, `--head`, `--base`, `--draft`, `--label`, `--reviewer`
+- `ghcli prs merge` — Merge a PR with `--method` (merge/squash/rebase) and `--message`
+- `ghcli prs close` — Close a PR without merging
+- 46 new tests across 3 new test files (87 total, 100% passing)
+
+### Changed
+- Bumped version to 1.2.0
+- `main.py` updated to register `comments` command group
+
 ## [1.1.0] — 2026-07-27
 
 ### Added

@@ -6,7 +6,7 @@ from rich.console import Console
 
 from ghcli import __version__
 
-# Existing commands
+# Core commands
 from ghcli.commands.auth import auth
 from ghcli.commands.repos import repos
 from ghcli.commands.issues import issues
@@ -15,7 +15,7 @@ from ghcli.commands.commits import commits
 from ghcli.commands.files import files
 from ghcli.commands.skills import skills
 
-# New v1.1.0 commands
+# v1.1.0 commands
 from ghcli.commands.search import search
 from ghcli.commands.gist import gist
 from ghcli.commands.release import release
@@ -24,13 +24,16 @@ from ghcli.commands.notifications import notifications
 from ghcli.commands.star import star
 from ghcli.commands.status import status
 
+# v1.2.0 commands
+from ghcli.commands.comments import comments
+
 console = Console()
 
 
 @click.group()
 @click.version_option(version=__version__, prog_name="ghcli")
 def cli() -> None:
-    """ghcli — A powerful GitHub CLI with 7 AI-powered skill modules.
+    """ghcli — A powerful GitHub CLI tool.
 
     Authenticate first:  ghcli auth setup
     Then explore:        ghcli repos list
@@ -54,6 +57,9 @@ cli.add_command(org)
 cli.add_command(notifications)
 cli.add_command(star)
 cli.add_command(status)
+
+# v1.2.0 commands
+cli.add_command(comments)
 
 
 @cli.command("version")

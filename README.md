@@ -45,8 +45,26 @@
 | 📦 Repositories | `repos list`, `repos view`, `repos create`, `repos delete`, `repos clone`, `repos fork` |
 | 🐛 Issues | `issues list`, `issues view`, `issues create`, `issues close`, `issues reopen`, `issues comment` |
 | 🔀 Pull Requests | `prs list`, `prs view`, `prs create`, `prs merge`, `prs close` |
+| 💬 Comments | `comments create`, `comments list`, `comments delete` |
 | 📜 Commits | `commits list`, `commits view`, `commits compare` |
 | 📁 Files | `files list`, `files view`, `files write`, `files delete`, `files tree` |
+| 🔍 Search | `search repos`, `search issues`, `search code`, `search users` |
+| 📋 Gists | `gist create`, `gist list`, `gist view`, `gist delete` |
+| 🚀 Releases | `release list`, `release create`, `release view`, `release download` |
+| 🏢 Organizations | `org list`, `org view`, `org members`, `org repos` |
+| 🔔 Notifications | `notifications list`, `notifications read`, `notifications read-all` |
+| ⭐ Stars | `star add`, `star remove`, `star list`, `star check` |
+| 📊 Status | `status` — auth + rate limit dashboard |
+
+**v1.2.0 highlights:**
+- `ghcli comments` — full comment management on issues & PRs
+- `ghcli repos create/delete/fork/clone` — complete repo lifecycle
+- `ghcli issues create/close/reopen/comment` — full issue workflow
+- `ghcli prs create/merge/close` — full PR workflow with merge method selection
+- `--json` flag on every list command for scripting/piping to `jq`
+- `--limit` flag on every list command for pagination control
+- Response caching (30s TTL) + exponential backoff retry in HTTP client
+- **87 tests, 100% passing**
 
 **Built with:**
 - [Click](https://click.palletsprojects.com/) — CLI framework
@@ -595,9 +613,23 @@ ghcli status --json   # raw JSON output
 ghcli version         # show version
 ```
 
+### 💬 Comments (v1.2.0)
+```bash
+# Add a comment to an issue or PR
+ghcli comments create owner/repo 42 --body "Looks good to me!"
+ghcli comments create owner/repo 42          # opens $EDITOR
+
+# List comments on an issue or PR
+ghcli comments list owner/repo 42
+ghcli comments list owner/repo 42 --json
+
+# Delete a comment by ID
+ghcli comments delete owner/repo 987654321 --yes
+```
+
 ### 🔧 Global Flags (all list commands)
 ```bash
---json    # output raw JSON for scripting
+--json    # output raw JSON for scripting / piping to jq
 --limit N # max results (default 10-20)
 ```
 
