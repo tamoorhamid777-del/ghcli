@@ -18,7 +18,7 @@ def runner():
 
 @pytest.fixture
 def mock_token():
-    with patch("ghcli.auth_store.load_token", return_value="ghp_test_token"):
+    with patch("ghcli.client.load_token", return_value="ghp_test_token"):
         yield
 
 
